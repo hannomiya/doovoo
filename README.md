@@ -1,2 +1,0 @@
-# doovoo
-watch, strap dealer
