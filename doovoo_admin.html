@@ -8,32 +8,36 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background-color: #0f0f0f; color: #e8e4dc; font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, system-ui, sans-serif; }
-        [v-cloak] { display: none; }
-        .card { background: #1a1a1a; border: 1px solid #2a2a2a; border-radius: 12px; }
-        .input { background: #111; border: 1px solid #333; border-radius: 8px; padding: 8px 12px; color: #e8e4dc; font-size: 12px; width: 100%; outline: none; transition: border-color .2s; }
-        .input:focus { border-color: #8B7355; }
-        .input::placeholder { color: #555; }
-        .btn-primary { background: #8B7355; color: white; border: none; border-radius: 8px; padding: 8px 16px; font-size: 12px; font-weight: 700; cursor: pointer; transition: background .2s; }
-        .btn-primary:hover { background: #6D5A3F; }
-        .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
-        .btn-danger { background: #3a1a1a; color: #f87171; border: 1px solid #5a2a2a; border-radius: 6px; padding: 4px 10px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all .2s; }
-        .btn-danger:hover { background: #5a2a2a; }
-        .tab-btn { padding: 6px 14px; font-size: 11px; font-weight: 700; border-radius: 6px; cursor: pointer; transition: all .2s; color: #666; background: transparent; border: 1px solid transparent; }
-        .tab-btn.active { color: #e8e4dc; background: #2a2a2a; border-color: #3a3a3a; }
-        .tab-btn:hover:not(.active) { color: #aaa; }
-        .badge { display: inline-block; font-size: 9px; font-weight: 800; letter-spacing: .08em; padding: 2px 7px; border-radius: 4px; text-transform: uppercase; }
-        select.input option { background: #1a1a1a; }
-        textarea.input { resize: vertical; min-height: 80px; }
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: #111; }
-        ::-webkit-scrollbar-thumb { background: #333; border-radius: 2px; }
+        body { background-color:#0f0f0f; color:#e8e4dc; font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif; }
+        [v-cloak] { display:none; }
+        .card { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; }
+        .input { background:#111; border:1px solid #333; border-radius:8px; padding:8px 12px; color:#e8e4dc; font-size:12px; width:100%; outline:none; transition:border-color .2s; }
+        .input:focus { border-color:#8B7355; }
+        .input::placeholder { color:#555; }
+        .btn-primary { background:#8B7355; color:white; border:none; border-radius:8px; padding:8px 16px; font-size:12px; font-weight:700; cursor:pointer; transition:background .2s; }
+        .btn-primary:hover { background:#6D5A3F; }
+        .btn-primary:disabled { opacity:.4; cursor:not-allowed; }
+        .btn-danger { background:#3a1a1a; color:#f87171; border:1px solid #5a2a2a; border-radius:6px; padding:4px 10px; font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; }
+        .btn-danger:hover { background:#5a2a2a; }
+        .tab-btn { padding:6px 14px; font-size:11px; font-weight:700; border-radius:6px; cursor:pointer; transition:all .2s; color:#666; background:transparent; border:1px solid transparent; }
+        .tab-btn.active { color:#e8e4dc; background:#2a2a2a; border-color:#3a3a3a; }
+        .tab-btn:hover:not(.active) { color:#aaa; }
+        .badge { display:inline-block; font-size:9px; font-weight:800; letter-spacing:.08em; padding:2px 7px; border-radius:4px; text-transform:uppercase; }
+        select.input option { background:#1a1a1a; }
+        textarea.input { resize:vertical; min-height:80px; }
+        ::-webkit-scrollbar { width:4px; }
+        ::-webkit-scrollbar-track { background:#111; }
+        ::-webkit-scrollbar-thumb { background:#333; border-radius:2px; }
+        /* 배송 단계 선택 버튼 */
+        .ship-btn { padding:4px 10px; font-size:10px; font-weight:700; border-radius:20px; cursor:pointer; border:1px solid #333; background:#111; color:#666; transition:all .2s; white-space:nowrap; }
+        .ship-btn.active { background:#8B7355; color:#fff; border-color:#8B7355; }
+        .ship-btn:hover:not(.active) { border-color:#8B7355; color:#8B7355; }
     </style>
 </head>
 <body class="min-h-screen">
 <div id="app" v-cloak>
 
-    <!-- ── 로그인 화면 ── -->
+    <!-- 로그인 -->
     <div v-if="!isAuthenticated" class="min-h-screen flex items-center justify-center p-4">
         <div class="w-full max-w-sm space-y-6">
             <div class="text-center space-y-1">
@@ -42,27 +46,16 @@
                 <p class="text-xs text-gray-600">관리자 전용 백오피스</p>
             </div>
             <div class="card p-6 space-y-3">
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1.5 tracking-wider uppercase">이메일</label>
-                    <input v-model="loginForm.email" type="email" placeholder="admin@doovoo.com" class="input" @keyup.enter="login">
-                </div>
-                <div>
-                    <label class="block text-[10px] font-bold text-gray-500 mb-1.5 tracking-wider uppercase">비밀번호</label>
-                    <input v-model="loginForm.password" type="password" placeholder="••••••••" class="input" @keyup.enter="login">
-                </div>
+                <div><label class="block text-[10px] font-bold text-gray-500 mb-1.5 tracking-wider uppercase">이메일</label><input v-model="loginForm.email" type="email" placeholder="admin@doovoo.com" class="input" @keyup.enter="login"></div>
+                <div><label class="block text-[10px] font-bold text-gray-500 mb-1.5 tracking-wider uppercase">비밀번호</label><input v-model="loginForm.password" type="password" placeholder="••••••••" class="input" @keyup.enter="login"></div>
                 <div v-if="loginError" class="text-xs text-red-400 bg-red-900/20 px-3 py-2 rounded-lg">{{ loginError }}</div>
-                <button @click="login" :disabled="isLoggingIn" class="btn-primary w-full py-2.5 mt-2">
-                    {{ isLoggingIn ? '로그인 중...' : '🔒 관제실 입장' }}
-                </button>
+                <button @click="login" :disabled="isLoggingIn" class="btn-primary w-full py-2.5 mt-2">{{ isLoggingIn?'로그인 중...':'🔒 관제실 입장' }}</button>
             </div>
-            <p class="text-center text-[10px] text-gray-700">Supabase Auth로 보호됩니다.</p>
         </div>
     </div>
 
-    <!-- ── 관리자 대시보드 ── -->
+    <!-- 대시보드 -->
     <div v-if="isAuthenticated" class="min-h-screen flex flex-col">
-
-        <!-- 헤더 -->
         <header class="border-b border-[#222] bg-[#111] sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-5 py-3 flex justify-between items-center">
                 <div class="flex items-center gap-4">
@@ -70,90 +63,66 @@
                         <h1 class="text-sm font-black tracking-widest text-white">DOOVOO <span class="text-[#8B7355]">관제실</span></h1>
                         <p class="text-[10px] text-gray-600">{{ adminEmail }}</p>
                     </div>
-                    <span class="badge" style="background:#1a2e1a; color:#4ade80;">● LIVE</span>
+                    <span class="badge" style="background:#1a2e1a;color:#4ade80;">● LIVE</span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <a href="index.html" target="_blank" class="text-[11px] text-gray-500 hover:text-white transition flex items-center gap-1">🛒 스토어 보기 ↗</a>
+                    <a href="index.html" target="_blank" class="text-[11px] text-gray-500 hover:text-white transition">🛒 스토어 보기 ↗</a>
                     <button @click="logout" class="text-[11px] text-gray-600 hover:text-red-400 transition font-bold">로그아웃</button>
                 </div>
             </div>
         </header>
 
-        <!-- 탭 네비 -->
+        <!-- 탭 -->
         <div class="border-b border-[#222] bg-[#0f0f0f] sticky top-[53px] z-30">
-            <div class="max-w-7xl mx-auto px-5 py-2 flex gap-1">
-                <button @click="adminTab = 'products'" :class="['tab-btn', adminTab === 'products' ? 'active' : '']">📦 상품 관리</button>
-                <button @click="adminTab = 'notices'"  :class="['tab-btn', adminTab === 'notices'  ? 'active' : '']">📢 공지사항</button>
-                <button @click="adminTab = 'reviews'"  :class="['tab-btn', adminTab === 'reviews'  ? 'active' : '']">✍️ 리뷰</button>
-                <button @click="adminTab = 'users'; fetchUsers()" :class="['tab-btn', adminTab === 'users' ? 'active' : '']">👥 회원 관리</button>
+            <div class="max-w-7xl mx-auto px-5 py-2 flex gap-1 flex-wrap">
+                <button @click="adminTab='products'" :class="['tab-btn',adminTab==='products'?'active':'']">📦 상품 관리</button>
+                <button @click="adminTab='notices'"  :class="['tab-btn',adminTab==='notices'?'active':'']">📢 공지사항</button>
+                <button @click="adminTab='reviews'"  :class="['tab-btn',adminTab==='reviews'?'active':'']">✍️ 리뷰</button>
+                <button @click="adminTab='users'; fetchUsers()" :class="['tab-btn',adminTab==='users'?'active':'']">👥 회원 현황</button>
+                <button @click="adminTab='orders'; fetchOrders()" :class="['tab-btn',adminTab==='orders'?'active':'']">🚚 배송 관리</button>
             </div>
         </div>
 
         <main class="flex-grow max-w-7xl mx-auto px-5 py-6 w-full">
 
-            <!-- ════════════════ 상품 관리 ════════════════ -->
-            <div v-if="adminTab === 'products'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- ════ 상품 관리 ════ -->
+            <div v-if="adminTab==='products'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="card p-5 space-y-3">
                     <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase border-b border-[#2a2a2a] pb-2">신규 상품 등록</h2>
                     <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">브랜드 *</label>
-                            <input v-model="newProduct.brand" type="text" placeholder="ex) NIKE" class="input">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">상품명 *</label>
-                            <input v-model="newProduct.name" type="text" placeholder="상품명 입력" class="input">
-                        </div>
+                        <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">브랜드 *</label><input v-model="newProduct.brand" type="text" placeholder="ex) NIKE" class="input"></div>
+                        <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">상품명 *</label><input v-model="newProduct.name" type="text" placeholder="상품명 입력" class="input"></div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">카테고리</label>
-                            <select v-model="newProduct.category" class="input">
-                                <option v-for="c in categories" :value="c">{{ c }}</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">판매가 (원) *</label>
-                            <input v-model.number="newProduct.price" type="number" placeholder="0" class="input">
-                        </div>
+                        <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">카테고리</label><select v-model="newProduct.category" @change="handleCategoryChange" class="input"><option v-for="c in categories" :value="c">{{ c }}</option></select></div>
+                        <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">판매가 (원) *</label><input v-model.number="newProduct.price" type="number" placeholder="0" class="input"></div>
                     </div>
-                    <div v-if="newProduct.category === '의류'" class="bg-[#111] p-3 rounded-lg border border-[#2a2a2a]">
+                    <div v-if="newProduct.category==='의류'" class="bg-[#111] p-3 rounded-lg border border-[#2a2a2a]">
                         <span class="block text-[10px] font-black text-[#8B7355] mb-2 tracking-wider">SIZE MAPPING</span>
                         <div class="flex flex-wrap gap-2">
                             <label v-for="sz in allowedClothingSizes" :key="sz" class="flex items-center gap-1.5 text-[11px] text-gray-400 cursor-pointer">
-                                <input type="checkbox" :value="sz" v-model="newProduct.sizes" class="w-3 h-3 accent-[#8B7355]">
-                                {{ sz }}
+                                <input type="checkbox" :value="sz" v-model="newProduct.sizes" class="w-3 h-3 accent-[#8B7355]">{{ sz }}
                             </label>
                         </div>
                     </div>
                     <div v-if="['시계','가방','악세서리'].includes(newProduct.category)" class="bg-[#111] p-3 rounded-lg border border-[#2a2a2a] space-y-2">
-                        <label class="flex items-center gap-2 text-[11px] text-gray-400 cursor-pointer">
-                            <input type="checkbox" v-model="newProduct.use_box_option" class="w-3.5 h-3.5 accent-[#8B7355]">
-                            박스 추가 옵션 활성화
-                        </label>
+                        <label class="flex items-center gap-2 text-[11px] text-gray-400 cursor-pointer"><input type="checkbox" v-model="newProduct.use_box_option" class="w-3.5 h-3.5 accent-[#8B7355]">박스 추가 옵션 활성화</label>
                         <input v-if="newProduct.use_box_option" v-model.number="newProduct.box_price" type="number" placeholder="박스 추가금 (원)" class="input">
                     </div>
-                    <div>
-                        <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">상품 설명</label>
-                        <textarea v-model="newProduct.description" placeholder="상품 설명을 입력하세요." class="input"></textarea>
-                    </div>
+                    <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">상품 설명</label><textarea v-model="newProduct.description" placeholder="상품 설명을 입력하세요." class="input"></textarea></div>
                     <div class="bg-[#111] p-3 rounded-lg border border-[#333] space-y-2">
                         <label class="block text-[10px] font-bold text-gray-500 tracking-wider">📁 대표 썸네일</label>
-                        <input type="file" @change="e => handleFileSelect(e, 'main')" accept="image/*" class="input text-gray-500">
-                        <div v-if="newProduct.mainPreview" class="mt-2 w-24 h-24 rounded overflow-hidden border border-[#333]">
-                            <img :src="newProduct.mainPreview" class="w-full h-full object-cover">
-                        </div>
+                        <input type="file" @change="e=>handleFileSelect(e,'main')" accept="image/*" class="input text-gray-500">
+                        <div v-if="newProduct.mainPreview" class="w-24 h-24 rounded overflow-hidden border border-[#333]"><img :src="newProduct.mainPreview" class="w-full h-full object-cover"></div>
                         <p v-if="uploadProgress.main" class="text-[10px] text-[#8B7355]">{{ uploadProgress.main }}</p>
                     </div>
                     <div class="bg-[#111] p-3 rounded-lg border border-[#8B7355]/30 space-y-2">
                         <label class="block text-[10px] font-black text-[#8B7355] tracking-wider">📁 상세 바디 이미지 (다중)</label>
-                        <input type="file" @change="e => handleFileSelect(e, 'detail')" accept="image/*" multiple class="input text-gray-500">
-                        <p v-if="newProduct.detailFiles.length > 0" class="text-[10px] text-[#8B7355]">⚡ {{ newProduct.detailFiles.length }}개 선택됨</p>
+                        <input type="file" @change="e=>handleFileSelect(e,'detail')" accept="image/*" multiple class="input text-gray-500">
+                        <p v-if="newProduct.detailFiles.length>0" class="text-[10px] text-[#8B7355]">⚡ {{ newProduct.detailFiles.length }}개 선택됨</p>
                         <p v-if="uploadProgress.detail" class="text-[10px] text-[#8B7355]">{{ uploadProgress.detail }}</p>
                     </div>
-                    <button @click="addProduct" :disabled="isSaving" class="btn-primary w-full py-2.5">
-                        {{ isSaving ? '저장 중...' : '🚀 스토어 실시간 배포' }}
-                    </button>
+                    <button @click="addProduct" :disabled="isSaving" class="btn-primary w-full py-2.5">{{ isSaving?'저장 중...':'🚀 스토어 실시간 배포' }}</button>
                 </div>
                 <div class="card p-5 space-y-3">
                     <div class="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
@@ -161,50 +130,36 @@
                         <button @click="fetchProducts" class="text-[10px] text-gray-600 hover:text-white transition">↻ 새로고침</button>
                     </div>
                     <div v-if="isLoading" class="text-xs text-gray-600 text-center py-8">불러오는 중...</div>
-                    <div v-if="!isLoading && products.length === 0" class="text-xs text-gray-700 text-center py-12">등록된 상품이 없습니다.</div>
+                    <div v-if="!isLoading&&products.length===0" class="text-xs text-gray-700 text-center py-12">등록된 상품이 없습니다.</div>
                     <div class="space-y-2 max-h-[600px] overflow-y-auto pr-1">
                         <div v-for="p in products" :key="p.id" class="flex items-center gap-3 bg-[#111] p-3 rounded-lg border border-[#222]">
-                            <div class="w-12 h-12 rounded-lg overflow-hidden bg-[#222] shrink-0 flex items-center justify-center">
-                                <img v-if="p.image_url" :src="p.image_url" class="w-full h-full object-cover">
-                                <span v-else class="text-gray-700 text-[9px]">NO IMG</span>
-                            </div>
+                            <div class="w-12 h-12 rounded-lg overflow-hidden bg-[#222] shrink-0 flex items-center justify-center"><img v-if="p.image_url" :src="p.image_url" class="w-full h-full object-cover"><span v-else class="text-gray-700 text-[9px]">NO IMG</span></div>
                             <div class="flex-grow min-w-0">
-                                <div class="flex items-center gap-1.5 flex-wrap">
-                                    <span class="text-[9px] font-black text-amber-500 tracking-wider">{{ p.brand }}</span>
-                                    <span class="text-[9px] text-gray-600">{{ p.category }}</span>
-                                </div>
+                                <div class="flex items-center gap-1.5 flex-wrap"><span class="text-[9px] font-black text-amber-500 tracking-wider">{{ p.brand }}</span><span class="text-[9px] text-gray-600">{{ p.category }}</span></div>
                                 <p class="text-xs font-bold text-gray-300 truncate">{{ p.name }}</p>
                                 <p class="text-[10px] text-[#8B7355] font-bold">{{ Number(p.price).toLocaleString() }}원</p>
                             </div>
                             <div class="flex flex-col gap-1 shrink-0">
-                                <button @click="deleteProduct(p.id, p.image_url, p.detail_image_urls)" class="btn-danger">삭제</button>
-                                <span class="text-[9px] text-gray-700 text-center">상세 {{ p.detail_image_urls ? p.detail_image_urls.length : 0 }}컷</span>
+                                <button @click="deleteProduct(p.id,p.image_url,p.detail_image_urls)" class="btn-danger">삭제</button>
+                                <span class="text-[9px] text-gray-700 text-center">상세 {{ p.detail_image_urls?p.detail_image_urls.length:0 }}컷</span>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ════════════════ 공지사항 ════════════════ -->
-            <div v-if="adminTab === 'notices'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- ════ 공지사항 ════ -->
+            <div v-if="adminTab==='notices'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="card p-5 space-y-3">
                     <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase border-b border-[#2a2a2a] pb-2">공지사항 발행</h2>
-                    <div>
-                        <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">제목 *</label>
-                        <input v-model="newNotice.title" type="text" placeholder="공지사항 제목" class="input">
-                    </div>
-                    <div>
-                        <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">내용 *</label>
-                        <textarea v-model="newNotice.content" placeholder="공지사항 내용을 작성하세요." class="input" rows="6"></textarea>
-                    </div>
+                    <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">제목 *</label><input v-model="newNotice.title" type="text" placeholder="공지사항 제목" class="input"></div>
+                    <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">내용 *</label><textarea v-model="newNotice.content" placeholder="공지사항 내용을 작성하세요." class="input" rows="6"></textarea></div>
                     <div class="bg-[#111] p-3 rounded-lg border border-[#333] space-y-2">
                         <label class="block text-[10px] font-bold text-gray-500 tracking-wider">📁 첨부 이미지 (선택)</label>
-                        <input type="file" @change="e => handleFileSelect(e, 'notice')" accept="image/*" class="input text-gray-500">
+                        <input type="file" @change="e=>handleFileSelect(e,'notice')" accept="image/*" class="input text-gray-500">
                         <p v-if="uploadProgress.notice" class="text-[10px] text-[#8B7355]">{{ uploadProgress.notice }}</p>
                     </div>
-                    <button @click="addNotice" :disabled="isSaving" class="btn-primary w-full py-2.5">
-                        {{ isSaving ? '저장 중...' : '📢 공지 즉시 배포' }}
-                    </button>
+                    <button @click="addNotice" :disabled="isSaving" class="btn-primary w-full py-2.5">{{ isSaving?'저장 중...':'📢 공지 즉시 배포' }}</button>
                 </div>
                 <div class="card p-5 space-y-3">
                     <div class="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
@@ -212,47 +167,31 @@
                         <button @click="fetchNotices" class="text-[10px] text-gray-600 hover:text-white transition">↻ 새로고침</button>
                     </div>
                     <div class="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                        <div v-if="!isLoading && notices.length === 0" class="text-xs text-gray-700 text-center py-12">등록된 공지가 없습니다.</div>
+                        <div v-if="!isLoading&&notices.length===0" class="text-xs text-gray-700 text-center py-12">등록된 공지가 없습니다.</div>
                         <div v-for="n in notices" :key="n.id" class="bg-[#111] p-3 rounded-lg border border-[#222] space-y-1.5">
-                            <div class="flex justify-between items-start gap-2">
-                                <p class="text-xs font-bold text-gray-300">{{ n.title }}</p>
-                                <button @click="deleteNotice(n.id, n.image_url)" class="btn-danger shrink-0">삭제</button>
-                            </div>
+                            <div class="flex justify-between items-start gap-2"><p class="text-xs font-bold text-gray-300">{{ n.title }}</p><button @click="deleteNotice(n.id,n.image_url)" class="btn-danger shrink-0">삭제</button></div>
                             <p class="text-[10px] text-gray-600 line-clamp-2">{{ n.content }}</p>
-                            <div v-if="n.image_url" class="w-full h-20 rounded overflow-hidden">
-                                <img :src="n.image_url" class="w-full h-full object-cover">
-                            </div>
+                            <div v-if="n.image_url" class="w-full h-20 rounded overflow-hidden"><img :src="n.image_url" class="w-full h-full object-cover"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ════════════════ 리뷰 ════════════════ -->
-            <div v-if="adminTab === 'reviews'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <!-- ════ 리뷰 ════ -->
+            <div v-if="adminTab==='reviews'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
                 <div class="card p-5 space-y-3">
                     <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase border-b border-[#2a2a2a] pb-2">리뷰 수동 적재</h2>
                     <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">작성자</label>
-                            <input v-model="newReview.author" type="text" placeholder="ex) 홍*동" class="input">
-                        </div>
-                        <div>
-                            <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">대상 상품명</label>
-                            <input v-model="newReview.product_name" type="text" placeholder="상품명 입력" class="input">
-                        </div>
+                        <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">작성자</label><input v-model="newReview.author" type="text" placeholder="ex) 홍*동" class="input"></div>
+                        <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">대상 상품명</label><input v-model="newReview.product_name" type="text" placeholder="상품명 입력" class="input"></div>
                     </div>
-                    <div>
-                        <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">리뷰 내용 *</label>
-                        <textarea v-model="newReview.content" placeholder="리뷰 내용을 입력하세요." class="input" rows="4"></textarea>
-                    </div>
+                    <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">리뷰 내용 *</label><textarea v-model="newReview.content" placeholder="리뷰 내용을 입력하세요." class="input" rows="4"></textarea></div>
                     <div class="bg-[#111] p-3 rounded-lg border border-[#333] space-y-2">
                         <label class="block text-[10px] font-bold text-gray-500 tracking-wider">📁 실착 이미지 (선택)</label>
-                        <input type="file" @change="e => handleFileSelect(e, 'review')" accept="image/*" class="input text-gray-500">
+                        <input type="file" @change="e=>handleFileSelect(e,'review')" accept="image/*" class="input text-gray-500">
                         <p v-if="uploadProgress.review" class="text-[10px] text-[#8B7355]">{{ uploadProgress.review }}</p>
                     </div>
-                    <button @click="addReview" :disabled="isSaving" class="btn-primary w-full py-2.5">
-                        {{ isSaving ? '저장 중...' : '✍️ 리뷰 즉시 적재' }}
-                    </button>
+                    <button @click="addReview" :disabled="isSaving" class="btn-primary w-full py-2.5">{{ isSaving?'저장 중...':'✍️ 리뷰 즉시 적재' }}</button>
                 </div>
                 <div class="card p-5 space-y-3">
                     <div class="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
@@ -260,112 +199,77 @@
                         <button @click="fetchReviews" class="text-[10px] text-gray-600 hover:text-white transition">↻ 새로고침</button>
                     </div>
                     <div class="space-y-2 max-h-[500px] overflow-y-auto pr-1">
-                        <div v-if="!isLoading && reviews.length === 0" class="text-xs text-gray-700 text-center py-12">등록된 리뷰가 없습니다.</div>
+                        <div v-if="!isLoading&&reviews.length===0" class="text-xs text-gray-700 text-center py-12">등록된 리뷰가 없습니다.</div>
                         <div v-for="r in reviews" :key="r.id" class="bg-[#111] p-3 rounded-lg border border-[#222] space-y-1.5">
-                            <div class="flex justify-between items-start gap-2">
-                                <div>
-                                    <p class="text-[10px] font-black text-amber-600">{{ r.product_name }}</p>
-                                    <p class="text-[10px] text-gray-500">by {{ r.author }}</p>
-                                </div>
-                                <button @click="deleteReview(r.id, r.image_url)" class="btn-danger shrink-0">삭제</button>
-                            </div>
+                            <div class="flex justify-between items-start gap-2"><div><p class="text-[10px] font-black text-amber-600">{{ r.product_name }}</p><p class="text-[10px] text-gray-500">by {{ r.author }}</p></div><button @click="deleteReview(r.id,r.image_url)" class="btn-danger shrink-0">삭제</button></div>
                             <p class="text-[11px] text-gray-400 italic line-clamp-2">"{{ r.content }}"</p>
-                            <div v-if="r.image_url" class="w-full h-20 rounded overflow-hidden">
-                                <img :src="r.image_url" class="w-full h-full object-cover">
-                            </div>
+                            <div v-if="r.image_url" class="w-full h-20 rounded overflow-hidden"><img :src="r.image_url" class="w-full h-full object-cover"></div>
                         </div>
                     </div>
                 </div>
             </div>
 
-            <!-- ════════════════ 회원 관리 ════════════════ -->
-            <div v-if="adminTab === 'users'" class="space-y-4">
-
+            <!-- ════ 회원 현황 ════ -->
+            <div v-if="adminTab==='users'" class="space-y-4">
                 <!-- 통계 카드 -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="card p-4 flex items-center gap-4">
                         <div class="w-10 h-10 rounded-full bg-[#8B7355]/20 flex items-center justify-center text-lg">👥</div>
-                        <div>
-                            <p class="text-[10px] text-gray-500 font-bold tracking-wider uppercase">전체 회원</p>
-                            <p class="text-2xl font-black text-white">{{ users.length }}</p>
-                        </div>
+                        <div><p class="text-[10px] text-gray-500 font-bold tracking-wider uppercase">전체 회원</p><p class="text-2xl font-black text-white">{{ users.length }}</p></div>
                     </div>
                     <div class="card p-4 flex items-center gap-4">
                         <div class="w-10 h-10 rounded-full bg-green-900/40 flex items-center justify-center text-lg">✅</div>
-                        <div>
-                            <p class="text-[10px] text-gray-500 font-bold tracking-wider uppercase">이메일 인증 완료</p>
-                            <p class="text-2xl font-black text-white">{{ users.filter(u => u.email_confirmed_at).length }}</p>
-                        </div>
+                        <div><p class="text-[10px] text-gray-500 font-bold tracking-wider uppercase">이메일 인증 완료</p><p class="text-2xl font-black text-white">{{ users.filter(u=>u.email_confirmed_at).length }}</p></div>
                     </div>
                     <div class="card p-4 flex items-center gap-4">
                         <div class="w-10 h-10 rounded-full bg-blue-900/40 flex items-center justify-center text-lg">📅</div>
-                        <div>
-                            <p class="text-[10px] text-gray-500 font-bold tracking-wider uppercase">이번 달 신규</p>
-                            <p class="text-2xl font-black text-white">{{ newThisMonth }}</p>
-                        </div>
+                        <div><p class="text-[10px] text-gray-500 font-bold tracking-wider uppercase">이번 달 신규</p><p class="text-2xl font-black text-white">{{ newThisMonth }}</p></div>
                     </div>
                 </div>
 
-                <!-- 검색 + 목록 -->
                 <div class="card p-5 space-y-4">
                     <div class="flex items-center justify-between border-b border-[#2a2a2a] pb-3 gap-3 flex-wrap">
                         <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase">회원 목록</h2>
                         <div class="flex items-center gap-2">
                             <div class="relative">
-                                <input v-model="userSearch" type="text" placeholder="이메일 검색..."
-                                       class="input pl-7 w-48" style="padding-top:6px;padding-bottom:6px;">
-                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
-                                     class="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.603 10.601Z"/>
-                                </svg>
+                                <input v-model="userSearch" type="text" placeholder="이메일 / 이름 검색..." class="input pl-6 w-48" style="padding-top:6px;padding-bottom:6px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-gray-600"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.603 10.601Z"/></svg>
                             </div>
-                            <button @click="fetchUsers" class="text-[10px] text-gray-600 hover:text-white transition px-2 py-1 border border-[#333] rounded-lg">↻ 새로고침</button>
+                            <button @click="fetchUsers" class="text-[10px] text-gray-600 hover:text-white transition px-2 py-1 border border-[#333] rounded-lg">↻</button>
                         </div>
                     </div>
-
                     <div v-if="isUsersLoading" class="text-xs text-gray-600 text-center py-12">불러오는 중...</div>
-                    <div v-if="!isUsersLoading && filteredUsers.length === 0" class="text-xs text-gray-700 text-center py-12">
-                        {{ userSearch ? '검색 결과가 없습니다.' : '가입된 회원이 없습니다.' }}
-                    </div>
-
-                    <div v-if="!isUsersLoading && filteredUsers.length > 0" class="overflow-x-auto">
+                    <div v-if="!isUsersLoading&&filteredUsers.length===0" class="text-xs text-gray-700 text-center py-12">{{ userSearch?'검색 결과가 없습니다.':'가입된 회원이 없습니다.' }}</div>
+                    <div v-if="!isUsersLoading&&filteredUsers.length>0" class="overflow-x-auto">
                         <table class="w-full text-xs">
                             <thead>
                                 <tr class="border-b border-[#2a2a2a]">
                                     <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">회원</th>
                                     <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">이메일</th>
+                                    <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">전화번호</th>
                                     <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">인증</th>
                                     <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">가입일</th>
-                                    <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">마지막 로그인</th>
                                     <th class="py-2 px-3"></th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-[#1f1f1f]">
-                                <tr v-for="u in filteredUsers" :key="u.id" class="hover:bg-[#1f1f1f] transition-colors group">
+                                <tr v-for="u in filteredUsers" :key="u.id" class="hover:bg-[#1f1f1f] transition-colors">
                                     <td class="py-3 px-3">
                                         <div class="flex items-center gap-2.5">
-                                            <div class="w-7 h-7 rounded-full bg-[#8B7355] flex items-center justify-center text-white text-[11px] font-black shrink-0">
-                                                {{ u.email ? u.email[0].toUpperCase() : '?' }}
-                                            </div>
-                                            <span class="font-bold text-gray-300">
-                                                {{ u.user_metadata?.name || '이름 없음' }}
-                                            </span>
+                                            <div class="w-7 h-7 rounded-full bg-[#8B7355] flex items-center justify-center text-white text-[11px] font-black shrink-0">{{ u.email?u.email[0].toUpperCase():'?' }}</div>
+                                            <span class="font-bold text-gray-300">{{ u.name || '-' }}</span>
                                         </div>
                                     </td>
                                     <td class="py-3 px-3 text-gray-400">{{ u.email }}</td>
+                                    <td class="py-3 px-3 text-gray-400">{{ u.phone || '-' }}</td>
                                     <td class="py-3 px-3">
-                                        <span v-if="u.email_confirmed_at"
-                                              class="text-[9px] font-black px-1.5 py-0.5 rounded" style="background:#1a2e1a; color:#4ade80;">✓ 인증</span>
-                                        <span v-else
-                                              class="text-[9px] font-black px-1.5 py-0.5 rounded" style="background:#2e1a1a; color:#f87171;">미인증</span>
+                                        <span v-if="u.email_confirmed_at" class="text-[9px] font-black px-1.5 py-0.5 rounded" style="background:#1a2e1a;color:#4ade80;">✓ 인증</span>
+                                        <span v-else class="text-[9px] font-black px-1.5 py-0.5 rounded" style="background:#2e1a1a;color:#f87171;">미인증</span>
                                     </td>
                                     <td class="py-3 px-3 text-gray-500">{{ formatDate(u.created_at) }}</td>
-                                    <td class="py-3 px-3 text-gray-500">{{ formatDate(u.last_sign_in_at) }}</td>
                                     <td class="py-3 px-3">
-                                        <button @click="openUserDetail(u)"
-                                                class="text-[10px] text-[#8B7355] hover:text-white font-bold transition mr-2">상세</button>
-                                        <button @click="kickUser(u)"
-                                                class="btn-danger py-1 px-2 text-[10px]">탈퇴</button>
+                                        <button @click="openUserDetail(u)" class="text-[10px] text-[#8B7355] hover:text-white font-bold transition mr-2">상세</button>
+                                        <button @click="kickUser(u)" class="btn-danger py-1 px-2 text-[10px]">탈퇴</button>
                                     </td>
                                 </tr>
                             </tbody>
@@ -374,83 +278,103 @@
                 </div>
             </div>
 
+            <!-- ════ 배송 관리 ════ -->
+            <div v-if="adminTab==='orders'" class="space-y-4">
+                <!-- 통계 -->
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
+                    <div v-for="step in deliverySteps" :key="step.key" class="card p-3 text-center">
+                        <p class="text-[9px] text-gray-500 font-bold tracking-wider mb-1">{{ step.short }}</p>
+                        <p class="text-xl font-black text-white">{{ orderCountByStatus(step.key) }}</p>
+                    </div>
+                </div>
+
+                <div class="card p-5 space-y-4">
+                    <div class="flex items-center justify-between border-b border-[#2a2a2a] pb-3 gap-3 flex-wrap">
+                        <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase">주문 목록 (결제 완료 기준)</h2>
+                        <div class="flex items-center gap-2 flex-wrap">
+                            <select v-model="orderStatusFilter" class="input text-[10px]" style="width:auto;padding:4px 8px;">
+                                <option value="">전체 단계</option>
+                                <option v-for="s in deliverySteps" :key="s.key" :value="s.key">{{ s.label }}</option>
+                            </select>
+                            <div class="relative">
+                                <input v-model="orderSearch" type="text" placeholder="주문번호/이름 검색..." class="input pl-6 w-44" style="padding-top:5px;padding-bottom:5px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" class="w-3 h-3 absolute left-2 top-1/2 -translate-y-1/2 text-gray-600"><path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.603 10.601Z"/></svg>
+                            </div>
+                            <button @click="fetchOrders" class="text-[10px] text-gray-600 hover:text-white transition px-2 py-1 border border-[#333] rounded-lg">↻</button>
+                        </div>
+                    </div>
+
+                    <div v-if="isOrdersLoading" class="text-xs text-gray-600 text-center py-12">불러오는 중...</div>
+                    <div v-if="!isOrdersLoading&&filteredOrders.length===0" class="text-xs text-gray-700 text-center py-12">해당 조건의 주문이 없습니다.</div>
+
+                    <div class="space-y-3 max-h-[700px] overflow-y-auto pr-1">
+                        <div v-for="order in filteredOrders" :key="order.id" class="bg-[#111] p-4 rounded-xl border border-[#222] space-y-3">
+                            <!-- 주문 헤더 -->
+                            <div class="flex items-start justify-between gap-3">
+                                <div class="space-y-0.5">
+                                    <div class="flex items-center gap-2 flex-wrap">
+                                        <span class="font-mono text-[10px] text-gray-500">{{ order.order_id }}</span>
+                                        <span class="text-[9px] font-black px-1.5 py-0.5 rounded" :class="order.order_type==='guest'?'bg-purple-900/50 text-purple-400':'bg-blue-900/50 text-blue-400'">{{ order.order_type==='guest'?'비회원':'회원' }}</span>
+                                    </div>
+                                    <p class="text-sm font-black text-gray-200">{{ order.product_name }} <span class="text-gray-500 font-normal text-xs">({{ order.size }})</span></p>
+                                    <p class="text-[10px] text-gray-400">{{ order.receiver_name }} · {{ order.receiver_phone }} · {{ formatPrice(order.amount) }}원</p>
+                                    <p class="text-[10px] text-gray-500">{{ order.address }} {{ order.address_detail }}</p>
+                                    <p v-if="order.memo" class="text-[10px] text-amber-600">📝 {{ order.memo }}</p>
+                                </div>
+                                <span class="text-[9px] font-black px-2 py-1 rounded-full shrink-0" :class="stepBadgeClass(order.delivery_status)">{{ deliveryLabel(order.delivery_status) }}</span>
+                            </div>
+
+                            <!-- 배송 단계 선택 -->
+                            <div class="space-y-2">
+                                <p class="text-[10px] text-gray-600 font-bold tracking-wider">배송 단계 변경</p>
+                                <div class="flex flex-wrap gap-1.5">
+                                    <button v-for="step in deliverySteps" :key="step.key"
+                                            @click="updateDeliveryStatus(order, step.key)"
+                                            :class="['ship-btn', order.delivery_status===step.key?'active':'']">
+                                        {{ step.label }}
+                                    </button>
+                                </div>
+                            </div>
+                            <p class="text-[9px] text-gray-600">{{ formatDate(order.created_at) }}</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
 
-    <!-- ── 회원 상세 모달 ── -->
-    <div v-if="selectedUser" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
-         @click.self="selectedUser = null">
+    <!-- 회원 상세 모달 -->
+    <div v-if="selectedUser" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" @click.self="selectedUser=null">
         <div class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#2a2a2a]">
                 <div class="flex items-center gap-3">
-                    <div class="w-9 h-9 rounded-full bg-[#8B7355] flex items-center justify-center text-white font-black">
-                        {{ selectedUser.email ? selectedUser.email[0].toUpperCase() : '?' }}
-                    </div>
-                    <div>
-                        <p class="text-sm font-black text-white">{{ selectedUser.user_metadata?.name || '이름 없음' }}</p>
-                        <p class="text-[10px] text-gray-500">{{ selectedUser.email }}</p>
-                    </div>
+                    <div class="w-9 h-9 rounded-full bg-[#8B7355] flex items-center justify-center text-white font-black">{{ selectedUser.email?selectedUser.email[0].toUpperCase():'?' }}</div>
+                    <div><p class="text-sm font-black text-white">{{ selectedUser.name || '이름 없음' }}</p><p class="text-[10px] text-gray-500">{{ selectedUser.email }}</p></div>
                 </div>
-                <button @click="selectedUser = null" class="text-gray-600 hover:text-white text-xl leading-none transition">✕</button>
+                <button @click="selectedUser=null" class="text-gray-600 hover:text-white text-xl leading-none transition">✕</button>
             </div>
             <div class="p-5 space-y-3 text-xs">
                 <div class="grid grid-cols-2 gap-3">
-                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]">
-                        <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">이름</p>
-                        <p class="text-gray-300 font-bold">{{ selectedUser.user_metadata?.name || '-' }}</p>
-                    </div>
-                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]">
-                        <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">전화번호</p>
-                        <p class="text-gray-300 font-bold">{{ selectedUser.user_metadata?.phone || '-' }}</p>
-                    </div>
-                    <div class="bg-[#111] p-3 rounded-xl border border-[#222] col-span-2">
-                        <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">주소</p>
-                        <p class="text-gray-300 font-bold">
-                            {{ selectedUser.user_metadata?.postcode ? '[' + selectedUser.user_metadata.postcode + '] ' : '' }}
-                            {{ selectedUser.user_metadata?.address || '-' }}
-                            {{ selectedUser.user_metadata?.address_detail || '' }}
-                        </p>
-                    </div>
-                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]">
-                        <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">통관부호</p>
-                        <p class="text-gray-300 font-mono font-bold">{{ selectedUser.user_metadata?.customs_code || '-' }}</p>
-                    </div>
-                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]">
-                        <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">이메일 인증</p>
-                        <p :class="selectedUser.email_confirmed_at ? 'text-green-400' : 'text-red-400'" class="font-bold">
-                            {{ selectedUser.email_confirmed_at ? '✓ 완료' : '✗ 미인증' }}
-                        </p>
-                    </div>
-                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]">
-                        <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">가입일</p>
-                        <p class="text-gray-300">{{ formatDate(selectedUser.created_at) }}</p>
-                    </div>
-                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]">
-                        <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">마지막 로그인</p>
-                        <p class="text-gray-300">{{ formatDate(selectedUser.last_sign_in_at) }}</p>
-                    </div>
+                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]"><p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">이름</p><p class="text-gray-300 font-bold">{{ selectedUser.name||'-' }}</p></div>
+                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]"><p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">전화번호</p><p class="text-gray-300 font-bold">{{ selectedUser.phone||'-' }}</p></div>
+                    <div class="bg-[#111] p-3 rounded-xl border border-[#222] col-span-2"><p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">주소</p><p class="text-gray-300 font-bold leading-relaxed">{{ selectedUser.postcode?`[${selectedUser.postcode}] `:'' }}{{ selectedUser.address||'-' }} {{ selectedUser.address_detail||'' }}</p></div>
+                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]"><p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">통관부호</p><p class="text-gray-300 font-mono font-bold">{{ selectedUser.customs_code||'-' }}</p></div>
+                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]"><p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">가입일</p><p class="text-gray-300">{{ formatDate(selectedUser.created_at) }}</p></div>
                 </div>
-                <!-- 약관 동의 현황 -->
                 <div class="bg-[#111] p-3 rounded-xl border border-[#222] space-y-1.5">
                     <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-2">약관 동의 현황</p>
                     <div class="flex flex-wrap gap-1.5">
-                        <span :class="selectedUser.user_metadata?.terms_service ? 'bg-green-900/60 text-green-400' : 'bg-[#222] text-gray-600'"
-                              class="text-[9px] font-bold px-2 py-0.5 rounded">이용약관</span>
-                        <span :class="selectedUser.user_metadata?.terms_privacy ? 'bg-green-900/60 text-green-400' : 'bg-[#222] text-gray-600'"
-                              class="text-[9px] font-bold px-2 py-0.5 rounded">개인정보수집</span>
-                        <span :class="selectedUser.user_metadata?.terms_thirdparty ? 'bg-green-900/60 text-green-400' : 'bg-[#222] text-gray-600'"
-                              class="text-[9px] font-bold px-2 py-0.5 rounded">제3자제공</span>
-                        <span :class="selectedUser.user_metadata?.terms_marketing ? 'bg-blue-900/60 text-blue-400' : 'bg-[#222] text-gray-600'"
-                              class="text-[9px] font-bold px-2 py-0.5 rounded">마케팅(선택)</span>
+                        <span :class="selectedUser.terms_service?'bg-green-900/60 text-green-400':'bg-[#222] text-gray-600'" class="text-[9px] font-bold px-2 py-0.5 rounded">이용약관</span>
+                        <span :class="selectedUser.terms_privacy?'bg-green-900/60 text-green-400':'bg-[#222] text-gray-600'" class="text-[9px] font-bold px-2 py-0.5 rounded">개인정보수집</span>
+                        <span :class="selectedUser.terms_thirdparty?'bg-green-900/60 text-green-400':'bg-[#222] text-gray-600'" class="text-[9px] font-bold px-2 py-0.5 rounded">제3자제공</span>
+                        <span :class="selectedUser.terms_marketing?'bg-blue-900/60 text-blue-400':'bg-[#222] text-gray-600'" class="text-[9px] font-bold px-2 py-0.5 rounded">마케팅(선택)</span>
                     </div>
                 </div>
             </div>
-            <div class="px-5 pb-5">
-                <button @click="kickUser(selectedUser)" class="btn-danger w-full py-2.5 text-center">🚫 이 회원 탈퇴 처리</button>
-            </div>
+            <div class="px-5 pb-5"><button @click="kickUser(selectedUser)" class="btn-danger w-full py-2.5 text-center">🚫 이 회원 탈퇴 처리</button></div>
         </div>
     </div>
-
 </div>
 
 <script>
@@ -461,312 +385,252 @@ const SUPABASE_URL  = 'https://ntexeskcthjnfafogknk.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50ZXhlc2tjdGhqbmZhZm9na25rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMzExMjEsImV4cCI6MjA5NTcwNzEyMX0.qz9hqjP_-wYFUeGmbC3mh0ZPEQsPUKAAxJYUHeviauY';
 const BUCKET = 'doovoo-images';
 
+const DELIVERY_STEPS = [
+    { key:'preparing',  label:'상품 준비중',       short:'준비중' },
+    { key:'inspecting', label:'현지 상품 검수중',   short:'검수중' },
+    { key:'arrived',    label:'국내 입고',          short:'국내입고' },
+    { key:'shipping',   label:'배송중',             short:'배송중' },
+    { key:'delivered',  label:'배송 완료',          short:'완료' },
+];
+
 createApp({
     setup() {
         const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-        // ── auth ──────────────────────────────────────────────────
         const isAuthenticated = ref(false);
         const adminEmail      = ref('');
-        const loginForm       = ref({ email: '', password: '' });
+        const loginForm       = ref({ email:'', password:'' });
         const loginError      = ref('');
         const isLoggingIn     = ref(false);
+        const adminTab        = ref('products');
+        const isLoading       = ref(false);
+        const isSaving        = ref(false);
+        const uploadProgress  = ref({ main:'', detail:'', notice:'', review:'' });
 
-        // ── ui ────────────────────────────────────────────────────
-        const adminTab       = ref('products');
-        const isLoading      = ref(false);
-        const isSaving       = ref(false);
-        const uploadProgress = ref({ main: '', detail: '', notice: '', review: '' });
-
-        // ── data ──────────────────────────────────────────────────
-        const categories           = ref(['의류', '가방', '신발', '시계', '악세서리', 'etc']);
-        const allowedClothingSizes = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
+        const categories           = ref(['의류','가방','신발','시계','악세서리','etc']);
+        const allowedClothingSizes = ['XS','S','M','L','XL','2XL','3XL'];
         const products = ref([]);
         const notices  = ref([]);
         const reviews  = ref([]);
 
-        // ── 회원 관리 state ───────────────────────────────────────
-        const users         = ref([]);
-        const isUsersLoading = ref(false);
-        const userSearch    = ref('');
-        const selectedUser  = ref(null);
+        const newProduct = ref({ brand:'', name:'', category:'의류', price:null, description:'', sizes:[], use_box_option:false, box_price:0, mainFile:null, mainPreview:'', detailFiles:[] });
+        const newNotice  = ref({ title:'', content:'', noticeFile:null });
+        const newReview  = ref({ author:'', product_name:'', content:'', reviewFile:null });
 
-        const filteredUsers = computed(() => {
+        // 회원 state
+        const users          = ref([]);
+        const isUsersLoading = ref(false);
+        const userSearch     = ref('');
+        const selectedUser   = ref(null);
+        const filteredUsers  = computed(() => {
             if (!userSearch.value.trim()) return users.value;
             const q = userSearch.value.toLowerCase();
-            return users.value.filter(u =>
-                (u.email || '').toLowerCase().includes(q) ||
-                (u.user_metadata?.name || '').toLowerCase().includes(q)
-            );
+            return users.value.filter(u => (u.email||'').toLowerCase().includes(q) || (u.name||'').toLowerCase().includes(q));
         });
-
         const newThisMonth = computed(() => {
             const now = new Date();
-            return users.value.filter(u => {
-                const d = new Date(u.created_at);
-                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
-            }).length;
+            return users.value.filter(u => { const d=new Date(u.created_at); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); }).length;
         });
 
-        // ── form state ────────────────────────────────────────────
-        const newProduct = ref({ brand: '', name: '', category: '의류', price: null, description: '', sizes: [], use_box_option: false, box_price: 0, mainFile: null, mainPreview: '', detailFiles: [] });
-        const newNotice  = ref({ title: '', content: '', noticeFile: null });
-        const newReview  = ref({ author: '', product_name: '', content: '', reviewFile: null });
+        // 배송 state
+        const orders           = ref([]);
+        const isOrdersLoading  = ref(false);
+        const orderSearch      = ref('');
+        const orderStatusFilter = ref('');
+        const deliverySteps    = DELIVERY_STEPS;
 
-        // ── auth ──────────────────────────────────────────────────
+        const filteredOrders = computed(() => {
+            let r = orders.value;
+            if (orderStatusFilter.value) r = r.filter(o => o.delivery_status === orderStatusFilter.value);
+            if (orderSearch.value.trim()) {
+                const q = orderSearch.value.toLowerCase();
+                r = r.filter(o => (o.order_id||'').toLowerCase().includes(q) || (o.receiver_name||'').toLowerCase().includes(q) || (o.product_name||'').toLowerCase().includes(q));
+            }
+            return r;
+        });
+
+        const orderCountByStatus = (key) => orders.value.filter(o => o.delivery_status === key).length;
+
+        const deliveryLabel = (s) => {
+            const step = DELIVERY_STEPS.find(d => d.key === s);
+            return step ? step.label : (s || '-');
+        };
+
+        const stepBadgeClass = (s) => {
+            const map = { preparing:'bg-blue-900/50 text-blue-400', inspecting:'bg-indigo-900/50 text-indigo-400', arrived:'bg-purple-900/50 text-purple-400', shipping:'bg-cyan-900/50 text-cyan-400', delivered:'bg-green-900/50 text-green-400' };
+            return map[s] || 'bg-[#222] text-gray-500';
+        };
+
+        // auth
         const login = async () => {
-            loginError.value  = '';
-            isLoggingIn.value = true;
-            const { data, error } = await sb.auth.signInWithPassword({ email: loginForm.value.email, password: loginForm.value.password });
-            isLoggingIn.value = false;
-            if (error) { loginError.value = '로그인 실패: ' + (error.message === 'Invalid login credentials' ? '이메일 또는 비밀번호가 올바르지 않습니다.' : error.message); return; }
-            isAuthenticated.value = true;
-            adminEmail.value      = data.user.email;
-            loadAll();
+            loginError.value=''; isLoggingIn.value=true;
+            const { data, error }=await sb.auth.signInWithPassword({ email:loginForm.value.email, password:loginForm.value.password });
+            isLoggingIn.value=false;
+            if (error) { loginError.value='로그인 실패: '+(error.message==='Invalid login credentials'?'이메일 또는 비밀번호가 올바르지 않습니다.':error.message); return; }
+            isAuthenticated.value=true; adminEmail.value=data.user.email; loadAll();
         };
-
-        const logout = async () => {
-            await sb.auth.signOut();
-            isAuthenticated.value = false;
-            adminEmail.value      = '';
-        };
+        const logout = async () => { await sb.auth.signOut(); isAuthenticated.value=false; adminEmail.value=''; };
 
         onMounted(async () => {
-            const { data: { session } } = await sb.auth.getSession();
-            if (session) {
-                isAuthenticated.value = true;
-                adminEmail.value      = session.user.email;
-                loadAll();
-            }
+            const { data:{ session } }=await sb.auth.getSession();
+            if (session) { isAuthenticated.value=true; adminEmail.value=session.user.email; loadAll(); }
         });
 
-        const loadAll = async () => {
-            isLoading.value = true;
-            await Promise.all([fetchProducts(), fetchNotices(), fetchReviews()]);
-            isLoading.value = false;
-        };
+        const loadAll = async () => { isLoading.value=true; await Promise.all([fetchProducts(),fetchNotices(),fetchReviews()]); isLoading.value=false; };
 
-        // ── fetch ─────────────────────────────────────────────────
         async function fetchProducts() {
-            const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
-            if (error) { console.error(error); return; }
-            products.value = (data || []).map(p => ({
-                ...p,
-                sizes:             Array.isArray(p.sizes)             ? p.sizes             : (p.sizes             ? JSON.parse(p.sizes)             : []),
-                detail_image_urls: Array.isArray(p.detail_image_urls) ? p.detail_image_urls : (p.detail_image_urls ? JSON.parse(p.detail_image_urls) : []),
-            }));
+            const { data }=await sb.from('products').select('*').order('created_at',{ascending:false});
+            products.value=(data||[]).map(p=>({...p, sizes:Array.isArray(p.sizes)?p.sizes:(p.sizes?JSON.parse(p.sizes):[]), detail_image_urls:Array.isArray(p.detail_image_urls)?p.detail_image_urls:(p.detail_image_urls?JSON.parse(p.detail_image_urls):[])}));
         }
-        async function fetchNotices() {
-            const { data, error } = await sb.from('notices').select('*').order('created_at', { ascending: false });
-            if (error) { console.error(error); return; }
-            notices.value = data || [];
-        }
-        async function fetchReviews() {
-            const { data, error } = await sb.from('reviews').select('*').order('created_at', { ascending: false });
-            if (error) { console.error(error); return; }
-            reviews.value = data || [];
-        }
+        async function fetchNotices() { const { data }=await sb.from('notices').select('*').order('created_at',{ascending:false}); notices.value=data||[]; }
+        async function fetchReviews() { const { data }=await sb.from('reviews').select('*').order('created_at',{ascending:false}); reviews.value=data||[]; }
 
-        // ── 회원 조회 ─────────────────────────────────────────────
-        // ※ auth.users는 anon key로 직접 조회 불가 → profiles 테이블 or admin API 필요
-        // 아래는 Supabase admin listUsers API 사용 (서비스 롤 키 없이는 불가)
-        // → 대신 가입 시 user_metadata에서 저장된 정보를 auth.getUser()로 읽거나
-        //   별도 profiles 테이블을 조회합니다.
-        // 현재 구조에서는 profiles 테이블이 없으므로
-        // auth.admin.listUsers()는 서비스 롤 키가 필요 → 여기선 anon key 한계 안내 포함
+        // 회원 조회 (profiles 테이블)
         const fetchUsers = async () => {
-            isUsersLoading.value = true;
-            // profiles 테이블이 있으면 우선 시도
-            const { data: profileData, error: profileError } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
-            if (!profileError && profileData) {
-                // profiles 테이블 구조를 auth user 형태로 맞춤
-                users.value = profileData.map(p => ({
-                    id: p.id,
-                    email: p.email,
-                    email_confirmed_at: p.email_confirmed_at,
-                    created_at: p.created_at,
-                    last_sign_in_at: p.last_sign_in_at,
-                    user_metadata: {
-                        name: p.name,
-                        phone: p.phone,
-                        address: p.address,
-                        address_detail: p.address_detail,
-                        postcode: p.postcode,
-                        customs_code: p.customs_code,
-                        terms_service: p.terms_service,
-                        terms_privacy: p.terms_privacy,
-                        terms_thirdparty: p.terms_thirdparty,
-                        terms_marketing: p.terms_marketing,
-                    }
-                }));
-            } else {
-                // profiles 테이블 없음 → 현재 로그인 유저 정보만 표시
-                const { data: { user } } = await sb.auth.getUser();
-                users.value = user ? [user] : [];
-                if (users.value.length > 0) {
-                    console.warn('⚠️ profiles 테이블이 없습니다. 전체 회원 조회를 위해 Supabase 대시보드에서 profiles 테이블을 생성하거나 Service Role Key를 사용하세요.');
-                }
+            isUsersLoading.value=true;
+            const { data, error }=await sb.from('profiles').select('*').order('created_at',{ascending:false});
+            isUsersLoading.value=false;
+            if (!error && data) { users.value=data; }
+            else {
+                // profiles 없으면 현재 로그인 유저만
+                const { data:{ user } }=await sb.auth.getUser();
+                users.value=user?[{ id:user.id, email:user.email, name:user.user_metadata?.name, phone:user.user_metadata?.phone, created_at:user.created_at, email_confirmed_at:user.email_confirmed_at }]:[];
+                if (error) console.warn('profiles 테이블 없음. Supabase에서 생성하세요.');
             }
-            isUsersLoading.value = false;
         };
-
-        const openUserDetail = (u) => { selectedUser.value = u; };
-
+        const openUserDetail = (u) => { selectedUser.value=u; };
         const kickUser = async (u) => {
-            if (!confirm(`${u.user_metadata?.name || u.email} 회원을 탈퇴 처리하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
-            // profiles 테이블에서 삭제 (있는 경우)
-            await sb.from('profiles').delete().eq('id', u.id);
-            // auth 유저 삭제는 Service Role Key 필요 → 안내
-            alert(`✅ ${u.email} 회원의 프로필 데이터가 삭제되었습니다.\n\n※ Supabase Auth 계정 완전 삭제는 Supabase 대시보드 > Authentication > Users에서 직접 처리해 주세요.`);
-            selectedUser.value = null;
-            await fetchUsers();
+            if (!confirm(`${u.name||u.email} 회원을 탈퇴 처리하시겠습니까?`)) return;
+            await sb.from('profiles').delete().eq('id',u.id);
+            alert(`✅ ${u.email} 프로필 데이터가 삭제되었습니다.\n\n※ Auth 계정 완전 삭제는 Supabase 대시보드 > Authentication > Users에서 처리하세요.`);
+            selectedUser.value=null; await fetchUsers();
         };
 
-        // ── Storage 업로드 ────────────────────────────────────────
+        // 배송 조회
+        const fetchOrders = async () => {
+            isOrdersLoading.value=true;
+            const { data }=await sb.from('orders').select('*').eq('status','paid').order('created_at',{ascending:false});
+            isOrdersLoading.value=false;
+            orders.value=data||[];
+        };
+
+        const updateDeliveryStatus = async (order, newStatus) => {
+            const { error }=await sb.from('orders').update({ delivery_status:newStatus }).eq('id',order.id);
+            if (error) { alert('업데이트 실패: '+error.message); return; }
+            order.delivery_status=newStatus; // 로컬 즉시 반영
+        };
+
+        // Storage 업로드
         const uploadToStorage = async (file, folder, progressKey) => {
-            const ext  = file.name.split('.').pop();
-            const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
-            uploadProgress.value[progressKey] = '업로드 중...';
-            const { error } = await sb.storage.from(BUCKET).upload(path, file, { cacheControl: '3600', upsert: false });
-            if (error) { uploadProgress.value[progressKey] = '❌ 업로드 실패: ' + error.message; return null; }
-            const { data } = sb.storage.from(BUCKET).getPublicUrl(path);
-            uploadProgress.value[progressKey] = '✅ 완료';
+            const ext=file.name.split('.').pop();
+            const path=`${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+            uploadProgress.value[progressKey]='업로드 중...';
+            const { error }=await sb.storage.from(BUCKET).upload(path,file,{cacheControl:'3600',upsert:false});
+            if (error) { uploadProgress.value[progressKey]='❌ 업로드 실패: '+error.message; return null; }
+            const { data }=sb.storage.from(BUCKET).getPublicUrl(path);
+            uploadProgress.value[progressKey]='✅ 완료';
             return data.publicUrl;
         };
 
         const handleFileSelect = (event, type) => {
-            const files = event.target.files;
-            if (!files || files.length === 0) return;
-            if (type === 'main') {
-                newProduct.value.mainFile    = files[0];
-                newProduct.value.mainPreview = URL.createObjectURL(files[0]);
-                uploadProgress.value.main    = '';
-            } else if (type === 'detail') {
-                newProduct.value.detailFiles = Array.from(files);
-                uploadProgress.value.detail  = '';
-            } else if (type === 'notice') {
-                newNotice.value.noticeFile  = files[0];
-                uploadProgress.value.notice = '';
-            } else if (type === 'review') {
-                newReview.value.reviewFile  = files[0];
-                uploadProgress.value.review = '';
-            }
+            const files=event.target.files; if (!files||files.length===0) return;
+            if (type==='main') { newProduct.value.mainFile=files[0]; newProduct.value.mainPreview=URL.createObjectURL(files[0]); uploadProgress.value.main=''; }
+            else if (type==='detail') { newProduct.value.detailFiles=Array.from(files); uploadProgress.value.detail=''; }
+            else if (type==='notice') { newNotice.value.noticeFile=files[0]; uploadProgress.value.notice=''; }
+            else if (type==='review') { newReview.value.reviewFile=files[0]; uploadProgress.value.review=''; }
         };
 
         const handleCategoryChange = () => {
-            if (newProduct.value.category !== '의류') {
-                newProduct.value.sizes          = ['FREE'];
-                newProduct.value.use_box_option = ['시계', '가방', '악세서리'].includes(newProduct.value.category);
-                if (!newProduct.value.use_box_option) newProduct.value.box_price = 0;
-            } else {
-                newProduct.value.sizes          = [];
-                newProduct.value.use_box_option = false;
-                newProduct.value.box_price      = 0;
-            }
+            if (newProduct.value.category!=='의류') { newProduct.value.sizes=['FREE']; newProduct.value.use_box_option=['시계','가방','악세서리'].includes(newProduct.value.category); if(!newProduct.value.use_box_option)newProduct.value.box_price=0; }
+            else { newProduct.value.sizes=[]; newProduct.value.use_box_option=false; newProduct.value.box_price=0; }
         };
 
-        // ── CRUD: 상품 ────────────────────────────────────────────
         const addProduct = async () => {
-            if (!newProduct.value.brand || !newProduct.value.name || !newProduct.value.price) { alert('⚠️ 브랜드, 상품명, 가격은 필수입니다.'); return; }
-            if (newProduct.value.category === '의류' && newProduct.value.sizes.length === 0) { alert('⚠️ 의류 사이즈를 선택해 주세요.'); return; }
-            isSaving.value = true;
-            let image_url = null, detail_image_urls = [];
-            if (newProduct.value.mainFile) image_url = await uploadToStorage(newProduct.value.mainFile, 'products/main', 'main');
-            if (newProduct.value.detailFiles.length > 0) {
-                uploadProgress.value.detail = `0 / ${newProduct.value.detailFiles.length} 업로드 중...`;
-                for (let i = 0; i < newProduct.value.detailFiles.length; i++) {
-                    const url = await uploadToStorage(newProduct.value.detailFiles[i], 'products/detail', 'detail');
-                    if (url) detail_image_urls.push(url);
-                    uploadProgress.value.detail = `${i + 1} / ${newProduct.value.detailFiles.length} 완료`;
-                }
+            if (!newProduct.value.brand||!newProduct.value.name||!newProduct.value.price) { alert('⚠️ 브랜드, 상품명, 가격은 필수입니다.'); return; }
+            if (newProduct.value.category==='의류'&&newProduct.value.sizes.length===0) { alert('⚠️ 의류 사이즈를 선택해 주세요.'); return; }
+            isSaving.value=true;
+            let image_url=null, detail_image_urls=[];
+            if (newProduct.value.mainFile) image_url=await uploadToStorage(newProduct.value.mainFile,'products/main','main');
+            if (newProduct.value.detailFiles.length>0) {
+                uploadProgress.value.detail=`0/${newProduct.value.detailFiles.length} 업로드 중...`;
+                for (let i=0;i<newProduct.value.detailFiles.length;i++) { const url=await uploadToStorage(newProduct.value.detailFiles[i],'products/detail','detail'); if(url)detail_image_urls.push(url); uploadProgress.value.detail=`${i+1}/${newProduct.value.detailFiles.length} 완료`; }
             }
-            const { error } = await sb.from('products').insert([{ brand: newProduct.value.brand, name: newProduct.value.name, category: newProduct.value.category, price: newProduct.value.price, description: newProduct.value.description, sizes: newProduct.value.sizes, use_box_option: newProduct.value.use_box_option, box_price: newProduct.value.box_price, image_url, detail_image_urls }]);
-            isSaving.value = false;
-            if (error) { alert('❌ 저장 실패: ' + error.message); return; }
+            const { error }=await sb.from('products').insert([{ brand:newProduct.value.brand, name:newProduct.value.name, category:newProduct.value.category, price:newProduct.value.price, description:newProduct.value.description, sizes:newProduct.value.sizes, use_box_option:newProduct.value.use_box_option, box_price:newProduct.value.box_price, image_url, detail_image_urls }]);
+            isSaving.value=false;
+            if (error) { alert('❌ 저장 실패: '+error.message); return; }
             alert('✅ 상품이 등록되었습니다.');
-            newProduct.value     = { brand: '', name: '', category: '의류', price: null, description: '', sizes: [], use_box_option: false, box_price: 0, mainFile: null, mainPreview: '', detailFiles: [] };
-            uploadProgress.value = { main: '', detail: '', notice: '', review: '' };
-            await fetchProducts();
+            newProduct.value={brand:'',name:'',category:'의류',price:null,description:'',sizes:[],use_box_option:false,box_price:0,mainFile:null,mainPreview:'',detailFiles:[]};
+            uploadProgress.value={main:'',detail:'',notice:'',review:''}; await fetchProducts();
         };
 
         const deleteProduct = async (id, imageUrl, detailUrls) => {
             if (!confirm('이 상품을 삭제할까요?')) return;
-            const pathsToDelete = [];
-            if (imageUrl) pathsToDelete.push(imageUrl.split(`${BUCKET}/`)[1]);
-            if (detailUrls?.length > 0) detailUrls.forEach(u => { if (u) pathsToDelete.push(u.split(`${BUCKET}/`)[1]); });
-            if (pathsToDelete.length > 0) await sb.storage.from(BUCKET).remove(pathsToDelete.filter(Boolean));
-            const { error } = await sb.from('products').delete().eq('id', id);
-            if (error) { alert('❌ 삭제 실패: ' + error.message); return; }
-            products.value = products.value.filter(p => p.id !== id);
+            const paths=[];
+            if (imageUrl) paths.push(imageUrl.split(`${BUCKET}/`)[1]);
+            if (detailUrls?.length>0) detailUrls.forEach(u=>{if(u)paths.push(u.split(`${BUCKET}/`)[1]);});
+            if (paths.length>0) await sb.storage.from(BUCKET).remove(paths.filter(Boolean));
+            const { error }=await sb.from('products').delete().eq('id',id);
+            if (error) { alert('❌ 삭제 실패: '+error.message); return; }
+            products.value=products.value.filter(p=>p.id!==id);
         };
 
-        // ── CRUD: 공지 ────────────────────────────────────────────
         const addNotice = async () => {
-            if (!newNotice.value.title || !newNotice.value.content) { alert('⚠️ 제목과 내용을 입력해 주세요.'); return; }
-            isSaving.value = true;
-            let image_url = null;
-            if (newNotice.value.noticeFile) image_url = await uploadToStorage(newNotice.value.noticeFile, 'notices', 'notice');
-            const { error } = await sb.from('notices').insert([{ title: newNotice.value.title, content: newNotice.value.content, image_url }]);
-            isSaving.value = false;
-            if (error) { alert('❌ 저장 실패: ' + error.message); return; }
+            if (!newNotice.value.title||!newNotice.value.content) { alert('⚠️ 제목과 내용을 입력해 주세요.'); return; }
+            isSaving.value=true;
+            let image_url=null;
+            if (newNotice.value.noticeFile) image_url=await uploadToStorage(newNotice.value.noticeFile,'notices','notice');
+            const { error }=await sb.from('notices').insert([{ title:newNotice.value.title, content:newNotice.value.content, image_url }]);
+            isSaving.value=false;
+            if (error) { alert('❌ 저장 실패: '+error.message); return; }
             alert('✅ 공지사항이 발행되었습니다.');
-            newNotice.value         = { title: '', content: '', noticeFile: null };
-            uploadProgress.value.notice = '';
-            await fetchNotices();
+            newNotice.value={title:'',content:'',noticeFile:null}; uploadProgress.value.notice=''; await fetchNotices();
         };
-
         const deleteNotice = async (id, imageUrl) => {
             if (!confirm('이 공지사항을 삭제할까요?')) return;
             if (imageUrl) await sb.storage.from(BUCKET).remove([imageUrl.split(`${BUCKET}/`)[1]].filter(Boolean));
-            const { error } = await sb.from('notices').delete().eq('id', id);
-            if (error) { alert('❌ 삭제 실패: ' + error.message); return; }
-            notices.value = notices.value.filter(n => n.id !== id);
+            const { error }=await sb.from('notices').delete().eq('id',id);
+            if (error) { alert('❌ 삭제 실패: '+error.message); return; }
+            notices.value=notices.value.filter(n=>n.id!==id);
         };
 
-        // ── CRUD: 리뷰 ────────────────────────────────────────────
         const addReview = async () => {
             if (!newReview.value.content) { alert('⚠️ 리뷰 내용을 입력해 주세요.'); return; }
-            isSaving.value = true;
-            let image_url = null;
-            if (newReview.value.reviewFile) image_url = await uploadToStorage(newReview.value.reviewFile, 'reviews', 'review');
-            const { error } = await sb.from('reviews').insert([{ author: newReview.value.author || '익명', product_name: newReview.value.product_name || '일반 구매 상품', content: newReview.value.content, image_url }]);
-            isSaving.value = false;
-            if (error) { alert('❌ 저장 실패: ' + error.message); return; }
+            isSaving.value=true;
+            let image_url=null;
+            if (newReview.value.reviewFile) image_url=await uploadToStorage(newReview.value.reviewFile,'reviews','review');
+            const { error }=await sb.from('reviews').insert([{ author:newReview.value.author||'익명', product_name:newReview.value.product_name||'일반 구매 상품', content:newReview.value.content, image_url }]);
+            isSaving.value=false;
+            if (error) { alert('❌ 저장 실패: '+error.message); return; }
             alert('✅ 리뷰가 등록되었습니다.');
-            newReview.value         = { author: '', product_name: '', content: '', reviewFile: null };
-            uploadProgress.value.review = '';
-            await fetchReviews();
+            newReview.value={author:'',product_name:'',content:'',reviewFile:null}; uploadProgress.value.review=''; await fetchReviews();
         };
-
         const deleteReview = async (id, imageUrl) => {
             if (!confirm('이 리뷰를 삭제할까요?')) return;
             if (imageUrl) await sb.storage.from(BUCKET).remove([imageUrl.split(`${BUCKET}/`)[1]].filter(Boolean));
-            const { error } = await sb.from('reviews').delete().eq('id', id);
-            if (error) { alert('❌ 삭제 실패: ' + error.message); return; }
-            reviews.value = reviews.value.filter(r => r.id !== id);
+            const { error }=await sb.from('reviews').delete().eq('id',id);
+            if (error) { alert('❌ 삭제 실패: '+error.message); return; }
+            reviews.value=reviews.value.filter(r=>r.id!==id);
         };
 
-        // ── helpers ───────────────────────────────────────────────
-        const formatDate = (dateStr) => {
-            if (!dateStr) return '-';
-            const d = new Date(dateStr);
-            return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
-        };
+        const formatDate = (d) => d?new Date(d).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
+        const formatPrice = (v) => v?Number(v).toLocaleString():0;
 
         return {
             isAuthenticated, adminEmail, loginForm, loginError, isLoggingIn,
             adminTab, isLoading, isSaving, uploadProgress,
             categories, allowedClothingSizes, products, notices, reviews,
             newProduct, newNotice, newReview,
+            login, logout, fetchProducts, fetchNotices, fetchReviews,
+            handleFileSelect, handleCategoryChange, addProduct, deleteProduct,
+            addNotice, deleteNotice, addReview, deleteReview,
+            formatDate, formatPrice,
             // 회원
             users, isUsersLoading, userSearch, filteredUsers, selectedUser, newThisMonth,
-            login, logout,
-            fetchProducts, fetchNotices, fetchReviews, fetchUsers,
-            handleFileSelect, handleCategoryChange,
-            addProduct, deleteProduct,
-            addNotice, deleteNotice,
-            addReview, deleteReview,
-            openUserDetail, kickUser, formatDate,
+            fetchUsers, openUserDetail, kickUser,
+            // 배송
+            orders, isOrdersLoading, orderSearch, orderStatusFilter, filteredOrders,
+            deliverySteps, deliveryLabel, stepBadgeClass, orderCountByStatus,
+            fetchOrders, updateDeliveryStatus,
         };
     }
 }).mount('#app');
