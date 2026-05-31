@@ -8,30 +8,29 @@
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
-        body { background-color:#0f0f0f; color:#e8e4dc; font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif; }
+        body { background-color:#0f0f0f;color:#e8e4dc;font-family:'Pretendard',-apple-system,BlinkMacSystemFont,system-ui,sans-serif; }
         [v-cloak] { display:none; }
-        .card { background:#1a1a1a; border:1px solid #2a2a2a; border-radius:12px; }
-        .input { background:#111; border:1px solid #333; border-radius:8px; padding:8px 12px; color:#e8e4dc; font-size:12px; width:100%; outline:none; transition:border-color .2s; }
+        .card { background:#1a1a1a;border:1px solid #2a2a2a;border-radius:12px; }
+        .input { background:#111;border:1px solid #333;border-radius:8px;padding:8px 12px;color:#e8e4dc;font-size:12px;width:100%;outline:none;transition:border-color .2s; }
         .input:focus { border-color:#8B7355; }
         .input::placeholder { color:#555; }
-        .btn-primary { background:#8B7355; color:white; border:none; border-radius:8px; padding:8px 16px; font-size:12px; font-weight:700; cursor:pointer; transition:background .2s; }
+        .btn-primary { background:#8B7355;color:white;border:none;border-radius:8px;padding:8px 16px;font-size:12px;font-weight:700;cursor:pointer;transition:background .2s; }
         .btn-primary:hover { background:#6D5A3F; }
-        .btn-primary:disabled { opacity:.4; cursor:not-allowed; }
-        .btn-danger { background:#3a1a1a; color:#f87171; border:1px solid #5a2a2a; border-radius:6px; padding:4px 10px; font-size:11px; font-weight:700; cursor:pointer; transition:all .2s; }
+        .btn-primary:disabled { opacity:.4;cursor:not-allowed; }
+        .btn-danger { background:#3a1a1a;color:#f87171;border:1px solid #5a2a2a;border-radius:6px;padding:4px 10px;font-size:11px;font-weight:700;cursor:pointer;transition:all .2s; }
         .btn-danger:hover { background:#5a2a2a; }
-        .tab-btn { padding:6px 14px; font-size:11px; font-weight:700; border-radius:6px; cursor:pointer; transition:all .2s; color:#666; background:transparent; border:1px solid transparent; }
-        .tab-btn.active { color:#e8e4dc; background:#2a2a2a; border-color:#3a3a3a; }
+        .tab-btn { padding:6px 14px;font-size:11px;font-weight:700;border-radius:6px;cursor:pointer;transition:all .2s;color:#666;background:transparent;border:1px solid transparent; }
+        .tab-btn.active { color:#e8e4dc;background:#2a2a2a;border-color:#3a3a3a; }
         .tab-btn:hover:not(.active) { color:#aaa; }
-        .badge { display:inline-block; font-size:9px; font-weight:800; letter-spacing:.08em; padding:2px 7px; border-radius:4px; text-transform:uppercase; }
+        .badge { display:inline-block;font-size:9px;font-weight:800;letter-spacing:.08em;padding:2px 7px;border-radius:4px;text-transform:uppercase; }
         select.input option { background:#1a1a1a; }
-        textarea.input { resize:vertical; min-height:80px; }
+        textarea.input { resize:vertical;min-height:80px; }
         ::-webkit-scrollbar { width:4px; }
         ::-webkit-scrollbar-track { background:#111; }
-        ::-webkit-scrollbar-thumb { background:#333; border-radius:2px; }
-        /* 배송 단계 선택 버튼 */
-        .ship-btn { padding:4px 10px; font-size:10px; font-weight:700; border-radius:20px; cursor:pointer; border:1px solid #333; background:#111; color:#666; transition:all .2s; white-space:nowrap; }
-        .ship-btn.active { background:#8B7355; color:#fff; border-color:#8B7355; }
-        .ship-btn:hover:not(.active) { border-color:#8B7355; color:#8B7355; }
+        ::-webkit-scrollbar-thumb { background:#333;border-radius:2px; }
+        .ship-btn { padding:4px 10px;font-size:10px;font-weight:700;border-radius:20px;cursor:pointer;border:1px solid #333;background:#111;color:#666;transition:all .2s;white-space:nowrap; }
+        .ship-btn.active { background:#8B7355;color:#fff;border-color:#8B7355; }
+        .ship-btn:hover:not(.active) { border-color:#8B7355;color:#8B7355; }
     </style>
 </head>
 <body class="min-h-screen">
@@ -59,10 +58,7 @@
         <header class="border-b border-[#222] bg-[#111] sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-5 py-3 flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <div>
-                        <h1 class="text-sm font-black tracking-widest text-white">DOOVOO <span class="text-[#8B7355]">관제실</span></h1>
-                        <p class="text-[10px] text-gray-600">{{ adminEmail }}</p>
-                    </div>
+                    <div><h1 class="text-sm font-black tracking-widest text-white">DOOVOO <span class="text-[#8B7355]">관제실</span></h1><p class="text-[10px] text-gray-600">{{ adminEmail }}</p></div>
                     <span class="badge" style="background:#1a2e1a;color:#4ade80;">● LIVE</span>
                 </div>
                 <div class="flex items-center gap-3">
@@ -72,7 +68,6 @@
             </div>
         </header>
 
-        <!-- 탭 -->
         <div class="border-b border-[#222] bg-[#0f0f0f] sticky top-[53px] z-30">
             <div class="max-w-7xl mx-auto px-5 py-2 flex gap-1 flex-wrap">
                 <button @click="adminTab='products'" :class="['tab-btn',adminTab==='products'?'active':'']">📦 상품 관리</button>
@@ -100,9 +95,7 @@
                     <div v-if="newProduct.category==='의류'" class="bg-[#111] p-3 rounded-lg border border-[#2a2a2a]">
                         <span class="block text-[10px] font-black text-[#8B7355] mb-2 tracking-wider">SIZE MAPPING</span>
                         <div class="flex flex-wrap gap-2">
-                            <label v-for="sz in allowedClothingSizes" :key="sz" class="flex items-center gap-1.5 text-[11px] text-gray-400 cursor-pointer">
-                                <input type="checkbox" :value="sz" v-model="newProduct.sizes" class="w-3 h-3 accent-[#8B7355]">{{ sz }}
-                            </label>
+                            <label v-for="sz in allowedClothingSizes" :key="sz" class="flex items-center gap-1.5 text-[11px] text-gray-400 cursor-pointer"><input type="checkbox" :value="sz" v-model="newProduct.sizes" class="w-3 h-3 accent-[#8B7355]">{{ sz }}</label>
                         </div>
                     </div>
                     <div v-if="['시계','가방','악세서리'].includes(newProduct.category)" class="bg-[#111] p-3 rounded-lg border border-[#2a2a2a] space-y-2">
@@ -209,24 +202,22 @@
                 </div>
             </div>
 
-            <!-- ════ 회원 현황 ════ -->
+            <!-- ════ 회원 현황 (이메일 인증 여부 제거) ════ -->
             <div v-if="adminTab==='users'" class="space-y-4">
-                <!-- 통계 카드 -->
                 <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
                     <div class="card p-4 flex items-center gap-4">
                         <div class="w-10 h-10 rounded-full bg-[#8B7355]/20 flex items-center justify-center text-lg">👥</div>
                         <div><p class="text-[10px] text-gray-500 font-bold tracking-wider uppercase">전체 회원</p><p class="text-2xl font-black text-white">{{ users.length }}</p></div>
                     </div>
                     <div class="card p-4 flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full bg-green-900/40 flex items-center justify-center text-lg">✅</div>
-                        <div><p class="text-[10px] text-gray-500 font-bold tracking-wider uppercase">이메일 인증 완료</p><p class="text-2xl font-black text-white">{{ users.filter(u=>u.email_confirmed_at).length }}</p></div>
-                    </div>
-                    <div class="card p-4 flex items-center gap-4">
-                        <div class="w-10 h-10 rounded-full bg-blue-900/40 flex items-center justify-center text-lg">📅</div>
+                        <div class="w-10 h-10 rounded-full bg-green-900/40 flex items-center justify-center text-lg">📅</div>
                         <div><p class="text-[10px] text-gray-500 font-bold tracking-wider uppercase">이번 달 신규</p><p class="text-2xl font-black text-white">{{ newThisMonth }}</p></div>
                     </div>
+                    <div class="card p-4 flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-amber-900/40 flex items-center justify-center text-lg">📦</div>
+                        <div><p class="text-[10px] text-gray-500 font-bold tracking-wider uppercase">마케팅 동의</p><p class="text-2xl font-black text-white">{{ users.filter(u=>u.terms_marketing).length }}</p></div>
+                    </div>
                 </div>
-
                 <div class="card p-5 space-y-4">
                     <div class="flex items-center justify-between border-b border-[#2a2a2a] pb-3 gap-3 flex-wrap">
                         <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase">회원 목록</h2>
@@ -244,10 +235,9 @@
                         <table class="w-full text-xs">
                             <thead>
                                 <tr class="border-b border-[#2a2a2a]">
-                                    <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">회원</th>
+                                    <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">이름</th>
                                     <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">이메일</th>
                                     <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">전화번호</th>
-                                    <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">인증</th>
                                     <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">가입일</th>
                                     <th class="py-2 px-3"></th>
                                 </tr>
@@ -257,15 +247,11 @@
                                     <td class="py-3 px-3">
                                         <div class="flex items-center gap-2.5">
                                             <div class="w-7 h-7 rounded-full bg-[#8B7355] flex items-center justify-center text-white text-[11px] font-black shrink-0">{{ u.email?u.email[0].toUpperCase():'?' }}</div>
-                                            <span class="font-bold text-gray-300">{{ u.name || '-' }}</span>
+                                            <span class="font-bold text-gray-300">{{ u.name||'-' }}</span>
                                         </div>
                                     </td>
                                     <td class="py-3 px-3 text-gray-400">{{ u.email }}</td>
-                                    <td class="py-3 px-3 text-gray-400">{{ u.phone || '-' }}</td>
-                                    <td class="py-3 px-3">
-                                        <span v-if="u.email_confirmed_at" class="text-[9px] font-black px-1.5 py-0.5 rounded" style="background:#1a2e1a;color:#4ade80;">✓ 인증</span>
-                                        <span v-else class="text-[9px] font-black px-1.5 py-0.5 rounded" style="background:#2e1a1a;color:#f87171;">미인증</span>
-                                    </td>
+                                    <td class="py-3 px-3 text-gray-400">{{ u.phone||'-' }}</td>
                                     <td class="py-3 px-3 text-gray-500">{{ formatDate(u.created_at) }}</td>
                                     <td class="py-3 px-3">
                                         <button @click="openUserDetail(u)" class="text-[10px] text-[#8B7355] hover:text-white font-bold transition mr-2">상세</button>
@@ -280,14 +266,12 @@
 
             <!-- ════ 배송 관리 ════ -->
             <div v-if="adminTab==='orders'" class="space-y-4">
-                <!-- 통계 -->
                 <div class="grid grid-cols-2 sm:grid-cols-5 gap-3">
                     <div v-for="step in deliverySteps" :key="step.key" class="card p-3 text-center">
                         <p class="text-[9px] text-gray-500 font-bold tracking-wider mb-1">{{ step.short }}</p>
                         <p class="text-xl font-black text-white">{{ orderCountByStatus(step.key) }}</p>
                     </div>
                 </div>
-
                 <div class="card p-5 space-y-4">
                     <div class="flex items-center justify-between border-b border-[#2a2a2a] pb-3 gap-3 flex-wrap">
                         <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase">주문 목록 (결제 완료 기준)</h2>
@@ -303,13 +287,10 @@
                             <button @click="fetchOrders" class="text-[10px] text-gray-600 hover:text-white transition px-2 py-1 border border-[#333] rounded-lg">↻</button>
                         </div>
                     </div>
-
                     <div v-if="isOrdersLoading" class="text-xs text-gray-600 text-center py-12">불러오는 중...</div>
                     <div v-if="!isOrdersLoading&&filteredOrders.length===0" class="text-xs text-gray-700 text-center py-12">해당 조건의 주문이 없습니다.</div>
-
                     <div class="space-y-3 max-h-[700px] overflow-y-auto pr-1">
                         <div v-for="order in filteredOrders" :key="order.id" class="bg-[#111] p-4 rounded-xl border border-[#222] space-y-3">
-                            <!-- 주문 헤더 -->
                             <div class="flex items-start justify-between gap-3">
                                 <div class="space-y-0.5">
                                     <div class="flex items-center gap-2 flex-wrap">
@@ -319,12 +300,11 @@
                                     <p class="text-sm font-black text-gray-200">{{ order.product_name }} <span class="text-gray-500 font-normal text-xs">({{ order.size }})</span></p>
                                     <p class="text-[10px] text-gray-400">{{ order.receiver_name }} · {{ order.receiver_phone }} · {{ formatPrice(order.amount) }}원</p>
                                     <p class="text-[10px] text-gray-500">{{ order.address }} {{ order.address_detail }}</p>
+                                    <p v-if="order.customs_code" class="text-[10px] text-gray-600">통관부호: {{ order.customs_code }}</p>
                                     <p v-if="order.memo" class="text-[10px] text-amber-600">📝 {{ order.memo }}</p>
                                 </div>
                                 <span class="text-[9px] font-black px-2 py-1 rounded-full shrink-0" :class="stepBadgeClass(order.delivery_status)">{{ deliveryLabel(order.delivery_status) }}</span>
                             </div>
-
-                            <!-- 배송 단계 선택 -->
                             <div class="space-y-2">
                                 <p class="text-[10px] text-gray-600 font-bold tracking-wider">배송 단계 변경</p>
                                 <div class="flex flex-wrap gap-1.5">
@@ -344,13 +324,13 @@
         </main>
     </div>
 
-    <!-- 회원 상세 모달 -->
+    <!-- 회원 상세 모달 (이메일 인증 제거) -->
     <div v-if="selectedUser" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4" @click.self="selectedUser=null">
         <div class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
             <div class="flex items-center justify-between px-5 py-4 border-b border-[#2a2a2a]">
                 <div class="flex items-center gap-3">
                     <div class="w-9 h-9 rounded-full bg-[#8B7355] flex items-center justify-center text-white font-black">{{ selectedUser.email?selectedUser.email[0].toUpperCase():'?' }}</div>
-                    <div><p class="text-sm font-black text-white">{{ selectedUser.name || '이름 없음' }}</p><p class="text-[10px] text-gray-500">{{ selectedUser.email }}</p></div>
+                    <div><p class="text-sm font-black text-white">{{ selectedUser.name||'이름 없음' }}</p><p class="text-[10px] text-gray-500">{{ selectedUser.email }}</p></div>
                 </div>
                 <button @click="selectedUser=null" class="text-gray-600 hover:text-white text-xl leading-none transition">✕</button>
             </div>
@@ -386,11 +366,11 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const BUCKET = 'doovoo-images';
 
 const DELIVERY_STEPS = [
-    { key:'preparing',  label:'상품 준비중',       short:'준비중' },
-    { key:'inspecting', label:'현지 상품 검수중',   short:'검수중' },
-    { key:'arrived',    label:'국내 입고',          short:'국내입고' },
-    { key:'shipping',   label:'배송중',             short:'배송중' },
-    { key:'delivered',  label:'배송 완료',          short:'완료' },
+    { key:'preparing',  label:'상품 준비중',     short:'준비중' },
+    { key:'inspecting', label:'현지 상품 검수중', short:'검수중' },
+    { key:'arrived',    label:'국내 입고',        short:'국내입고' },
+    { key:'shipping',   label:'배송중',           short:'배송중' },
+    { key:'delivered',  label:'배송 완료',        short:'완료' },
 ];
 
 createApp({
@@ -417,86 +397,70 @@ createApp({
         const newNotice  = ref({ title:'', content:'', noticeFile:null });
         const newReview  = ref({ author:'', product_name:'', content:'', reviewFile:null });
 
-        // 회원 state
+        // 회원
         const users          = ref([]);
         const isUsersLoading = ref(false);
         const userSearch     = ref('');
         const selectedUser   = ref(null);
         const filteredUsers  = computed(() => {
             if (!userSearch.value.trim()) return users.value;
-            const q = userSearch.value.toLowerCase();
-            return users.value.filter(u => (u.email||'').toLowerCase().includes(q) || (u.name||'').toLowerCase().includes(q));
+            const q=userSearch.value.toLowerCase();
+            return users.value.filter(u=>(u.email||'').toLowerCase().includes(q)||(u.name||'').toLowerCase().includes(q));
         });
         const newThisMonth = computed(() => {
-            const now = new Date();
-            return users.value.filter(u => { const d=new Date(u.created_at); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); }).length;
+            const now=new Date();
+            return users.value.filter(u=>{ const d=new Date(u.created_at); return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear(); }).length;
         });
 
-        // 배송 state
-        const orders           = ref([]);
-        const isOrdersLoading  = ref(false);
-        const orderSearch      = ref('');
+        // 배송
+        const orders            = ref([]);
+        const isOrdersLoading   = ref(false);
+        const orderSearch       = ref('');
         const orderStatusFilter = ref('');
-        const deliverySteps    = DELIVERY_STEPS;
+        const deliverySteps     = DELIVERY_STEPS;
 
         const filteredOrders = computed(() => {
-            let r = orders.value;
-            if (orderStatusFilter.value) r = r.filter(o => o.delivery_status === orderStatusFilter.value);
-            if (orderSearch.value.trim()) {
-                const q = orderSearch.value.toLowerCase();
-                r = r.filter(o => (o.order_id||'').toLowerCase().includes(q) || (o.receiver_name||'').toLowerCase().includes(q) || (o.product_name||'').toLowerCase().includes(q));
-            }
+            let r=orders.value;
+            if (orderStatusFilter.value) r=r.filter(o=>o.delivery_status===orderStatusFilter.value);
+            if (orderSearch.value.trim()) { const q=orderSearch.value.toLowerCase(); r=r.filter(o=>(o.order_id||'').toLowerCase().includes(q)||(o.receiver_name||'').toLowerCase().includes(q)||(o.product_name||'').toLowerCase().includes(q)); }
             return r;
         });
 
-        const orderCountByStatus = (key) => orders.value.filter(o => o.delivery_status === key).length;
+        const orderCountByStatus = (key) => orders.value.filter(o=>o.delivery_status===key).length;
+        const deliveryLabel = (s) => { const step=DELIVERY_STEPS.find(d=>d.key===s); return step?step.label:(s||'-'); };
+        const stepBadgeClass = (s) => ({ preparing:'bg-blue-900/50 text-blue-400', inspecting:'bg-indigo-900/50 text-indigo-400', arrived:'bg-purple-900/50 text-purple-400', shipping:'bg-cyan-900/50 text-cyan-400', delivered:'bg-green-900/50 text-green-400' }[s]||'bg-[#222] text-gray-500');
+        const formatDate  = (d) => d?new Date(d).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
+        const formatPrice = (v) => v?Number(v).toLocaleString():0;
 
-        const deliveryLabel = (s) => {
-            const step = DELIVERY_STEPS.find(d => d.key === s);
-            return step ? step.label : (s || '-');
-        };
-
-        const stepBadgeClass = (s) => {
-            const map = { preparing:'bg-blue-900/50 text-blue-400', inspecting:'bg-indigo-900/50 text-indigo-400', arrived:'bg-purple-900/50 text-purple-400', shipping:'bg-cyan-900/50 text-cyan-400', delivered:'bg-green-900/50 text-green-400' };
-            return map[s] || 'bg-[#222] text-gray-500';
-        };
-
-        // auth
         const login = async () => {
             loginError.value=''; isLoggingIn.value=true;
             const { data, error }=await sb.auth.signInWithPassword({ email:loginForm.value.email, password:loginForm.value.password });
             isLoggingIn.value=false;
-            if (error) { loginError.value='로그인 실패: '+(error.message==='Invalid login credentials'?'이메일 또는 비밀번호가 올바르지 않습니다.':error.message); return; }
+            if (error){ loginError.value='로그인 실패: '+(error.message==='Invalid login credentials'?'이메일 또는 비밀번호가 올바르지 않습니다.':error.message); return; }
             isAuthenticated.value=true; adminEmail.value=data.user.email; loadAll();
         };
         const logout = async () => { await sb.auth.signOut(); isAuthenticated.value=false; adminEmail.value=''; };
 
         onMounted(async () => {
             const { data:{ session } }=await sb.auth.getSession();
-            if (session) { isAuthenticated.value=true; adminEmail.value=session.user.email; loadAll(); }
+            if (session){ isAuthenticated.value=true; adminEmail.value=session.user.email; loadAll(); }
         });
 
         const loadAll = async () => { isLoading.value=true; await Promise.all([fetchProducts(),fetchNotices(),fetchReviews()]); isLoading.value=false; };
 
         async function fetchProducts() {
             const { data }=await sb.from('products').select('*').order('created_at',{ascending:false});
-            products.value=(data||[]).map(p=>({...p, sizes:Array.isArray(p.sizes)?p.sizes:(p.sizes?JSON.parse(p.sizes):[]), detail_image_urls:Array.isArray(p.detail_image_urls)?p.detail_image_urls:(p.detail_image_urls?JSON.parse(p.detail_image_urls):[])}));
+            products.value=(data||[]).map(p=>({...p,sizes:Array.isArray(p.sizes)?p.sizes:(p.sizes?JSON.parse(p.sizes):[]),detail_image_urls:Array.isArray(p.detail_image_urls)?p.detail_image_urls:(p.detail_image_urls?JSON.parse(p.detail_image_urls):[])}));
         }
         async function fetchNotices() { const { data }=await sb.from('notices').select('*').order('created_at',{ascending:false}); notices.value=data||[]; }
         async function fetchReviews() { const { data }=await sb.from('reviews').select('*').order('created_at',{ascending:false}); reviews.value=data||[]; }
 
-        // 회원 조회 (profiles 테이블)
         const fetchUsers = async () => {
             isUsersLoading.value=true;
             const { data, error }=await sb.from('profiles').select('*').order('created_at',{ascending:false});
             isUsersLoading.value=false;
-            if (!error && data) { users.value=data; }
-            else {
-                // profiles 없으면 현재 로그인 유저만
-                const { data:{ user } }=await sb.auth.getUser();
-                users.value=user?[{ id:user.id, email:user.email, name:user.user_metadata?.name, phone:user.user_metadata?.phone, created_at:user.created_at, email_confirmed_at:user.email_confirmed_at }]:[];
-                if (error) console.warn('profiles 테이블 없음. Supabase에서 생성하세요.');
-            }
+            if (!error&&data) users.value=data;
+            else { const{data:{user}}=await sb.auth.getUser(); users.value=user?[{id:user.id,email:user.email,name:user.user_metadata?.name,phone:user.user_metadata?.phone,created_at:user.created_at}]:[]; }
         };
         const openUserDetail = (u) => { selectedUser.value=u; };
         const kickUser = async (u) => {
@@ -506,114 +470,106 @@ createApp({
             selectedUser.value=null; await fetchUsers();
         };
 
-        // 배송 조회
         const fetchOrders = async () => {
             isOrdersLoading.value=true;
             const { data }=await sb.from('orders').select('*').eq('status','paid').order('created_at',{ascending:false});
-            isOrdersLoading.value=false;
-            orders.value=data||[];
+            isOrdersLoading.value=false; orders.value=data||[];
         };
 
         const updateDeliveryStatus = async (order, newStatus) => {
             const { error }=await sb.from('orders').update({ delivery_status:newStatus }).eq('id',order.id);
-            if (error) { alert('업데이트 실패: '+error.message); return; }
-            order.delivery_status=newStatus; // 로컬 즉시 반영
+            if (error){ alert('업데이트 실패: '+error.message); return; }
+            order.delivery_status=newStatus;
         };
 
-        // Storage 업로드
         const uploadToStorage = async (file, folder, progressKey) => {
-            const ext=file.name.split('.').pop();
-            const path=`${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+            const ext=file.name.split('.').pop(), path=`${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
             uploadProgress.value[progressKey]='업로드 중...';
             const { error }=await sb.storage.from(BUCKET).upload(path,file,{cacheControl:'3600',upsert:false});
-            if (error) { uploadProgress.value[progressKey]='❌ 업로드 실패: '+error.message; return null; }
+            if (error){ uploadProgress.value[progressKey]='❌ 업로드 실패: '+error.message; return null; }
             const { data }=sb.storage.from(BUCKET).getPublicUrl(path);
-            uploadProgress.value[progressKey]='✅ 완료';
-            return data.publicUrl;
+            uploadProgress.value[progressKey]='✅ 완료'; return data.publicUrl;
         };
 
         const handleFileSelect = (event, type) => {
-            const files=event.target.files; if (!files||files.length===0) return;
-            if (type==='main') { newProduct.value.mainFile=files[0]; newProduct.value.mainPreview=URL.createObjectURL(files[0]); uploadProgress.value.main=''; }
-            else if (type==='detail') { newProduct.value.detailFiles=Array.from(files); uploadProgress.value.detail=''; }
-            else if (type==='notice') { newNotice.value.noticeFile=files[0]; uploadProgress.value.notice=''; }
-            else if (type==='review') { newReview.value.reviewFile=files[0]; uploadProgress.value.review=''; }
+            const files=event.target.files; if(!files||files.length===0)return;
+            if(type==='main'){newProduct.value.mainFile=files[0];newProduct.value.mainPreview=URL.createObjectURL(files[0]);uploadProgress.value.main='';}
+            else if(type==='detail'){newProduct.value.detailFiles=Array.from(files);uploadProgress.value.detail='';}
+            else if(type==='notice'){newNotice.value.noticeFile=files[0];uploadProgress.value.notice='';}
+            else if(type==='review'){newReview.value.reviewFile=files[0];uploadProgress.value.review='';}
         };
 
         const handleCategoryChange = () => {
-            if (newProduct.value.category!=='의류') { newProduct.value.sizes=['FREE']; newProduct.value.use_box_option=['시계','가방','악세서리'].includes(newProduct.value.category); if(!newProduct.value.use_box_option)newProduct.value.box_price=0; }
-            else { newProduct.value.sizes=[]; newProduct.value.use_box_option=false; newProduct.value.box_price=0; }
+            if(newProduct.value.category!=='의류'){newProduct.value.sizes=['FREE'];newProduct.value.use_box_option=['시계','가방','악세서리'].includes(newProduct.value.category);if(!newProduct.value.use_box_option)newProduct.value.box_price=0;}
+            else{newProduct.value.sizes=[];newProduct.value.use_box_option=false;newProduct.value.box_price=0;}
         };
 
         const addProduct = async () => {
-            if (!newProduct.value.brand||!newProduct.value.name||!newProduct.value.price) { alert('⚠️ 브랜드, 상품명, 가격은 필수입니다.'); return; }
-            if (newProduct.value.category==='의류'&&newProduct.value.sizes.length===0) { alert('⚠️ 의류 사이즈를 선택해 주세요.'); return; }
+            if(!newProduct.value.brand||!newProduct.value.name||!newProduct.value.price){alert('⚠️ 브랜드, 상품명, 가격은 필수입니다.');return;}
+            if(newProduct.value.category==='의류'&&newProduct.value.sizes.length===0){alert('⚠️ 의류 사이즈를 선택해 주세요.');return;}
             isSaving.value=true;
             let image_url=null, detail_image_urls=[];
-            if (newProduct.value.mainFile) image_url=await uploadToStorage(newProduct.value.mainFile,'products/main','main');
-            if (newProduct.value.detailFiles.length>0) {
+            if(newProduct.value.mainFile)image_url=await uploadToStorage(newProduct.value.mainFile,'products/main','main');
+            if(newProduct.value.detailFiles.length>0){
                 uploadProgress.value.detail=`0/${newProduct.value.detailFiles.length} 업로드 중...`;
-                for (let i=0;i<newProduct.value.detailFiles.length;i++) { const url=await uploadToStorage(newProduct.value.detailFiles[i],'products/detail','detail'); if(url)detail_image_urls.push(url); uploadProgress.value.detail=`${i+1}/${newProduct.value.detailFiles.length} 완료`; }
+                for(let i=0;i<newProduct.value.detailFiles.length;i++){const url=await uploadToStorage(newProduct.value.detailFiles[i],'products/detail','detail');if(url)detail_image_urls.push(url);uploadProgress.value.detail=`${i+1}/${newProduct.value.detailFiles.length} 완료`;}
             }
-            const { error }=await sb.from('products').insert([{ brand:newProduct.value.brand, name:newProduct.value.name, category:newProduct.value.category, price:newProduct.value.price, description:newProduct.value.description, sizes:newProduct.value.sizes, use_box_option:newProduct.value.use_box_option, box_price:newProduct.value.box_price, image_url, detail_image_urls }]);
+            const{error}=await sb.from('products').insert([{brand:newProduct.value.brand,name:newProduct.value.name,category:newProduct.value.category,price:newProduct.value.price,description:newProduct.value.description,sizes:newProduct.value.sizes,use_box_option:newProduct.value.use_box_option,box_price:newProduct.value.box_price,image_url,detail_image_urls}]);
             isSaving.value=false;
-            if (error) { alert('❌ 저장 실패: '+error.message); return; }
+            if(error){alert('❌ 저장 실패: '+error.message);return;}
             alert('✅ 상품이 등록되었습니다.');
             newProduct.value={brand:'',name:'',category:'의류',price:null,description:'',sizes:[],use_box_option:false,box_price:0,mainFile:null,mainPreview:'',detailFiles:[]};
             uploadProgress.value={main:'',detail:'',notice:'',review:''}; await fetchProducts();
         };
 
         const deleteProduct = async (id, imageUrl, detailUrls) => {
-            if (!confirm('이 상품을 삭제할까요?')) return;
+            if(!confirm('이 상품을 삭제할까요?'))return;
             const paths=[];
-            if (imageUrl) paths.push(imageUrl.split(`${BUCKET}/`)[1]);
-            if (detailUrls?.length>0) detailUrls.forEach(u=>{if(u)paths.push(u.split(`${BUCKET}/`)[1]);});
-            if (paths.length>0) await sb.storage.from(BUCKET).remove(paths.filter(Boolean));
-            const { error }=await sb.from('products').delete().eq('id',id);
-            if (error) { alert('❌ 삭제 실패: '+error.message); return; }
+            if(imageUrl)paths.push(imageUrl.split(`${BUCKET}/`)[1]);
+            if(detailUrls?.length>0)detailUrls.forEach(u=>{if(u)paths.push(u.split(`${BUCKET}/`)[1]);});
+            if(paths.length>0)await sb.storage.from(BUCKET).remove(paths.filter(Boolean));
+            const{error}=await sb.from('products').delete().eq('id',id);
+            if(error){alert('❌ 삭제 실패: '+error.message);return;}
             products.value=products.value.filter(p=>p.id!==id);
         };
 
         const addNotice = async () => {
-            if (!newNotice.value.title||!newNotice.value.content) { alert('⚠️ 제목과 내용을 입력해 주세요.'); return; }
+            if(!newNotice.value.title||!newNotice.value.content){alert('⚠️ 제목과 내용을 입력해 주세요.');return;}
             isSaving.value=true;
             let image_url=null;
-            if (newNotice.value.noticeFile) image_url=await uploadToStorage(newNotice.value.noticeFile,'notices','notice');
-            const { error }=await sb.from('notices').insert([{ title:newNotice.value.title, content:newNotice.value.content, image_url }]);
+            if(newNotice.value.noticeFile)image_url=await uploadToStorage(newNotice.value.noticeFile,'notices','notice');
+            const{error}=await sb.from('notices').insert([{title:newNotice.value.title,content:newNotice.value.content,image_url}]);
             isSaving.value=false;
-            if (error) { alert('❌ 저장 실패: '+error.message); return; }
+            if(error){alert('❌ 저장 실패: '+error.message);return;}
             alert('✅ 공지사항이 발행되었습니다.');
-            newNotice.value={title:'',content:'',noticeFile:null}; uploadProgress.value.notice=''; await fetchNotices();
+            newNotice.value={title:'',content:'',noticeFile:null};uploadProgress.value.notice='';await fetchNotices();
         };
         const deleteNotice = async (id, imageUrl) => {
-            if (!confirm('이 공지사항을 삭제할까요?')) return;
-            if (imageUrl) await sb.storage.from(BUCKET).remove([imageUrl.split(`${BUCKET}/`)[1]].filter(Boolean));
-            const { error }=await sb.from('notices').delete().eq('id',id);
-            if (error) { alert('❌ 삭제 실패: '+error.message); return; }
+            if(!confirm('이 공지사항을 삭제할까요?'))return;
+            if(imageUrl)await sb.storage.from(BUCKET).remove([imageUrl.split(`${BUCKET}/`)[1]].filter(Boolean));
+            const{error}=await sb.from('notices').delete().eq('id',id);
+            if(error){alert('❌ 삭제 실패: '+error.message);return;}
             notices.value=notices.value.filter(n=>n.id!==id);
         };
 
         const addReview = async () => {
-            if (!newReview.value.content) { alert('⚠️ 리뷰 내용을 입력해 주세요.'); return; }
+            if(!newReview.value.content){alert('⚠️ 리뷰 내용을 입력해 주세요.');return;}
             isSaving.value=true;
             let image_url=null;
-            if (newReview.value.reviewFile) image_url=await uploadToStorage(newReview.value.reviewFile,'reviews','review');
-            const { error }=await sb.from('reviews').insert([{ author:newReview.value.author||'익명', product_name:newReview.value.product_name||'일반 구매 상품', content:newReview.value.content, image_url }]);
+            if(newReview.value.reviewFile)image_url=await uploadToStorage(newReview.value.reviewFile,'reviews','review');
+            const{error}=await sb.from('reviews').insert([{author:newReview.value.author||'익명',product_name:newReview.value.product_name||'일반 구매 상품',content:newReview.value.content,image_url}]);
             isSaving.value=false;
-            if (error) { alert('❌ 저장 실패: '+error.message); return; }
+            if(error){alert('❌ 저장 실패: '+error.message);return;}
             alert('✅ 리뷰가 등록되었습니다.');
-            newReview.value={author:'',product_name:'',content:'',reviewFile:null}; uploadProgress.value.review=''; await fetchReviews();
+            newReview.value={author:'',product_name:'',content:'',reviewFile:null};uploadProgress.value.review='';await fetchReviews();
         };
         const deleteReview = async (id, imageUrl) => {
-            if (!confirm('이 리뷰를 삭제할까요?')) return;
-            if (imageUrl) await sb.storage.from(BUCKET).remove([imageUrl.split(`${BUCKET}/`)[1]].filter(Boolean));
-            const { error }=await sb.from('reviews').delete().eq('id',id);
-            if (error) { alert('❌ 삭제 실패: '+error.message); return; }
+            if(!confirm('이 리뷰를 삭제할까요?'))return;
+            if(imageUrl)await sb.storage.from(BUCKET).remove([imageUrl.split(`${BUCKET}/`)[1]].filter(Boolean));
+            const{error}=await sb.from('reviews').delete().eq('id',id);
+            if(error){alert('❌ 삭제 실패: '+error.message);return;}
             reviews.value=reviews.value.filter(r=>r.id!==id);
         };
-
-        const formatDate = (d) => d?new Date(d).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
-        const formatPrice = (v) => v?Number(v).toLocaleString():0;
 
         return {
             isAuthenticated, adminEmail, loginForm, loginError, isLoggingIn,
@@ -624,10 +580,8 @@ createApp({
             handleFileSelect, handleCategoryChange, addProduct, deleteProduct,
             addNotice, deleteNotice, addReview, deleteReview,
             formatDate, formatPrice,
-            // 회원
             users, isUsersLoading, userSearch, filteredUsers, selectedUser, newThisMonth,
             fetchUsers, openUserDetail, kickUser,
-            // 배송
             orders, isOrdersLoading, orderSearch, orderStatusFilter, filteredOrders,
             deliverySteps, deliveryLabel, stepBadgeClass, orderCountByStatus,
             fetchOrders, updateDeliveryStatus,
