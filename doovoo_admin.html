@@ -55,9 +55,7 @@
                     {{ isLoggingIn ? '로그인 중...' : '🔒 관제실 입장' }}
                 </button>
             </div>
-            <p class="text-center text-[10px] text-gray-700">
-                Supabase Auth로 보호됩니다. 계정은 Supabase 대시보드에서 생성하세요.
-            </p>
+            <p class="text-center text-[10px] text-gray-700">Supabase Auth로 보호됩니다.</p>
         </div>
     </div>
 
@@ -75,9 +73,7 @@
                     <span class="badge" style="background:#1a2e1a; color:#4ade80;">● LIVE</span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <a href="index.html" target="_blank" class="text-[11px] text-gray-500 hover:text-white transition flex items-center gap-1">
-                        🛒 스토어 보기 ↗
-                    </a>
+                    <a href="index.html" target="_blank" class="text-[11px] text-gray-500 hover:text-white transition flex items-center gap-1">🛒 스토어 보기 ↗</a>
                     <button @click="logout" class="text-[11px] text-gray-600 hover:text-red-400 transition font-bold">로그아웃</button>
                 </div>
             </div>
@@ -89,6 +85,7 @@
                 <button @click="adminTab = 'products'" :class="['tab-btn', adminTab === 'products' ? 'active' : '']">📦 상품 관리</button>
                 <button @click="adminTab = 'notices'"  :class="['tab-btn', adminTab === 'notices'  ? 'active' : '']">📢 공지사항</button>
                 <button @click="adminTab = 'reviews'"  :class="['tab-btn', adminTab === 'reviews'  ? 'active' : '']">✍️ 리뷰</button>
+                <button @click="adminTab = 'users'; fetchUsers()" :class="['tab-btn', adminTab === 'users' ? 'active' : '']">👥 회원 관리</button>
             </div>
         </div>
 
@@ -96,11 +93,8 @@
 
             <!-- ════════════════ 상품 관리 ════════════════ -->
             <div v-if="adminTab === 'products'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
-                <!-- 등록 폼 -->
                 <div class="card p-5 space-y-3">
                     <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase border-b border-[#2a2a2a] pb-2">신규 상품 등록</h2>
-
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">브랜드 *</label>
@@ -111,11 +105,10 @@
                             <input v-model="newProduct.name" type="text" placeholder="상품명 입력" class="input">
                         </div>
                     </div>
-
                     <div class="grid grid-cols-2 gap-2">
                         <div>
                             <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">카테고리</label>
-                            <select v-model="newProduct.category" @change="handleCategoryChange" class="input">
+                            <select v-model="newProduct.category" class="input">
                                 <option v-for="c in categories" :value="c">{{ c }}</option>
                             </select>
                         </div>
@@ -124,8 +117,6 @@
                             <input v-model.number="newProduct.price" type="number" placeholder="0" class="input">
                         </div>
                     </div>
-
-                    <!-- 의류 사이즈 -->
                     <div v-if="newProduct.category === '의류'" class="bg-[#111] p-3 rounded-lg border border-[#2a2a2a]">
                         <span class="block text-[10px] font-black text-[#8B7355] mb-2 tracking-wider">SIZE MAPPING</span>
                         <div class="flex flex-wrap gap-2">
@@ -135,8 +126,6 @@
                             </label>
                         </div>
                     </div>
-
-                    <!-- 박스 옵션 -->
                     <div v-if="['시계','가방','악세서리'].includes(newProduct.category)" class="bg-[#111] p-3 rounded-lg border border-[#2a2a2a] space-y-2">
                         <label class="flex items-center gap-2 text-[11px] text-gray-400 cursor-pointer">
                             <input type="checkbox" v-model="newProduct.use_box_option" class="w-3.5 h-3.5 accent-[#8B7355]">
@@ -144,36 +133,28 @@
                         </label>
                         <input v-if="newProduct.use_box_option" v-model.number="newProduct.box_price" type="number" placeholder="박스 추가금 (원)" class="input">
                     </div>
-
                     <div>
                         <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">상품 설명</label>
                         <textarea v-model="newProduct.description" placeholder="상품 설명을 입력하세요." class="input"></textarea>
                     </div>
-
-                    <!-- 대표 이미지 업로드 -->
                     <div class="bg-[#111] p-3 rounded-lg border border-[#333] space-y-2">
-                        <label class="block text-[10px] font-bold text-gray-500 tracking-wider">📁 대표 썸네일 (Storage 업로드)</label>
+                        <label class="block text-[10px] font-bold text-gray-500 tracking-wider">📁 대표 썸네일</label>
                         <input type="file" @change="e => handleFileSelect(e, 'main')" accept="image/*" class="input text-gray-500">
                         <div v-if="newProduct.mainPreview" class="mt-2 w-24 h-24 rounded overflow-hidden border border-[#333]">
                             <img :src="newProduct.mainPreview" class="w-full h-full object-cover">
                         </div>
                         <p v-if="uploadProgress.main" class="text-[10px] text-[#8B7355]">{{ uploadProgress.main }}</p>
                     </div>
-
-                    <!-- 상세 이미지 업로드 -->
                     <div class="bg-[#111] p-3 rounded-lg border border-[#8B7355]/30 space-y-2">
-                        <label class="block text-[10px] font-black text-[#8B7355] tracking-wider">📁 상세 바디 이미지 (다중 선택)</label>
+                        <label class="block text-[10px] font-black text-[#8B7355] tracking-wider">📁 상세 바디 이미지 (다중)</label>
                         <input type="file" @change="e => handleFileSelect(e, 'detail')" accept="image/*" multiple class="input text-gray-500">
                         <p v-if="newProduct.detailFiles.length > 0" class="text-[10px] text-[#8B7355]">⚡ {{ newProduct.detailFiles.length }}개 선택됨</p>
                         <p v-if="uploadProgress.detail" class="text-[10px] text-[#8B7355]">{{ uploadProgress.detail }}</p>
                     </div>
-
                     <button @click="addProduct" :disabled="isSaving" class="btn-primary w-full py-2.5">
                         {{ isSaving ? '저장 중...' : '🚀 스토어 실시간 배포' }}
                     </button>
                 </div>
-
-                <!-- 상품 목록 -->
                 <div class="card p-5 space-y-3">
                     <div class="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
                         <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase">등록된 상품 ({{ products.length }})</h2>
@@ -206,7 +187,6 @@
 
             <!-- ════════════════ 공지사항 ════════════════ -->
             <div v-if="adminTab === 'notices'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
                 <div class="card p-5 space-y-3">
                     <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase border-b border-[#2a2a2a] pb-2">공지사항 발행</h2>
                     <div>
@@ -226,7 +206,6 @@
                         {{ isSaving ? '저장 중...' : '📢 공지 즉시 배포' }}
                     </button>
                 </div>
-
                 <div class="card p-5 space-y-3">
                     <div class="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
                         <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase">등록된 공지 ({{ notices.length }})</h2>
@@ -250,7 +229,6 @@
 
             <!-- ════════════════ 리뷰 ════════════════ -->
             <div v-if="adminTab === 'reviews'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-
                 <div class="card p-5 space-y-3">
                     <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase border-b border-[#2a2a2a] pb-2">리뷰 수동 적재</h2>
                     <div class="grid grid-cols-2 gap-2">
@@ -276,7 +254,6 @@
                         {{ isSaving ? '저장 중...' : '✍️ 리뷰 즉시 적재' }}
                     </button>
                 </div>
-
                 <div class="card p-5 space-y-3">
                     <div class="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
                         <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase">등록된 리뷰 ({{ reviews.length }})</h2>
@@ -301,12 +278,183 @@
                 </div>
             </div>
 
+            <!-- ════════════════ 회원 관리 ════════════════ -->
+            <div v-if="adminTab === 'users'" class="space-y-4">
+
+                <!-- 통계 카드 -->
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="card p-4 flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-[#8B7355]/20 flex items-center justify-center text-lg">👥</div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 font-bold tracking-wider uppercase">전체 회원</p>
+                            <p class="text-2xl font-black text-white">{{ users.length }}</p>
+                        </div>
+                    </div>
+                    <div class="card p-4 flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-green-900/40 flex items-center justify-center text-lg">✅</div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 font-bold tracking-wider uppercase">이메일 인증 완료</p>
+                            <p class="text-2xl font-black text-white">{{ users.filter(u => u.email_confirmed_at).length }}</p>
+                        </div>
+                    </div>
+                    <div class="card p-4 flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full bg-blue-900/40 flex items-center justify-center text-lg">📅</div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 font-bold tracking-wider uppercase">이번 달 신규</p>
+                            <p class="text-2xl font-black text-white">{{ newThisMonth }}</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 검색 + 목록 -->
+                <div class="card p-5 space-y-4">
+                    <div class="flex items-center justify-between border-b border-[#2a2a2a] pb-3 gap-3 flex-wrap">
+                        <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase">회원 목록</h2>
+                        <div class="flex items-center gap-2">
+                            <div class="relative">
+                                <input v-model="userSearch" type="text" placeholder="이메일 검색..."
+                                       class="input pl-7 w-48" style="padding-top:6px;padding-bottom:6px;">
+                                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor"
+                                     class="w-3.5 h-3.5 absolute left-2 top-1/2 -translate-y-1/2 text-gray-600">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.603 10.601Z"/>
+                                </svg>
+                            </div>
+                            <button @click="fetchUsers" class="text-[10px] text-gray-600 hover:text-white transition px-2 py-1 border border-[#333] rounded-lg">↻ 새로고침</button>
+                        </div>
+                    </div>
+
+                    <div v-if="isUsersLoading" class="text-xs text-gray-600 text-center py-12">불러오는 중...</div>
+                    <div v-if="!isUsersLoading && filteredUsers.length === 0" class="text-xs text-gray-700 text-center py-12">
+                        {{ userSearch ? '검색 결과가 없습니다.' : '가입된 회원이 없습니다.' }}
+                    </div>
+
+                    <div v-if="!isUsersLoading && filteredUsers.length > 0" class="overflow-x-auto">
+                        <table class="w-full text-xs">
+                            <thead>
+                                <tr class="border-b border-[#2a2a2a]">
+                                    <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">회원</th>
+                                    <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">이메일</th>
+                                    <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">인증</th>
+                                    <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">가입일</th>
+                                    <th class="text-left py-2 px-3 text-[10px] font-black text-gray-500 tracking-wider uppercase">마지막 로그인</th>
+                                    <th class="py-2 px-3"></th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-[#1f1f1f]">
+                                <tr v-for="u in filteredUsers" :key="u.id" class="hover:bg-[#1f1f1f] transition-colors group">
+                                    <td class="py-3 px-3">
+                                        <div class="flex items-center gap-2.5">
+                                            <div class="w-7 h-7 rounded-full bg-[#8B7355] flex items-center justify-center text-white text-[11px] font-black shrink-0">
+                                                {{ u.email ? u.email[0].toUpperCase() : '?' }}
+                                            </div>
+                                            <span class="font-bold text-gray-300">
+                                                {{ u.user_metadata?.name || '이름 없음' }}
+                                            </span>
+                                        </div>
+                                    </td>
+                                    <td class="py-3 px-3 text-gray-400">{{ u.email }}</td>
+                                    <td class="py-3 px-3">
+                                        <span v-if="u.email_confirmed_at"
+                                              class="text-[9px] font-black px-1.5 py-0.5 rounded" style="background:#1a2e1a; color:#4ade80;">✓ 인증</span>
+                                        <span v-else
+                                              class="text-[9px] font-black px-1.5 py-0.5 rounded" style="background:#2e1a1a; color:#f87171;">미인증</span>
+                                    </td>
+                                    <td class="py-3 px-3 text-gray-500">{{ formatDate(u.created_at) }}</td>
+                                    <td class="py-3 px-3 text-gray-500">{{ formatDate(u.last_sign_in_at) }}</td>
+                                    <td class="py-3 px-3">
+                                        <button @click="openUserDetail(u)"
+                                                class="text-[10px] text-[#8B7355] hover:text-white font-bold transition mr-2">상세</button>
+                                        <button @click="kickUser(u)"
+                                                class="btn-danger py-1 px-2 text-[10px]">탈퇴</button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
         </main>
     </div>
+
+    <!-- ── 회원 상세 모달 ── -->
+    <div v-if="selectedUser" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4"
+         @click.self="selectedUser = null">
+        <div class="bg-[#1a1a1a] border border-[#2a2a2a] rounded-2xl w-full max-w-md shadow-2xl overflow-hidden">
+            <div class="flex items-center justify-between px-5 py-4 border-b border-[#2a2a2a]">
+                <div class="flex items-center gap-3">
+                    <div class="w-9 h-9 rounded-full bg-[#8B7355] flex items-center justify-center text-white font-black">
+                        {{ selectedUser.email ? selectedUser.email[0].toUpperCase() : '?' }}
+                    </div>
+                    <div>
+                        <p class="text-sm font-black text-white">{{ selectedUser.user_metadata?.name || '이름 없음' }}</p>
+                        <p class="text-[10px] text-gray-500">{{ selectedUser.email }}</p>
+                    </div>
+                </div>
+                <button @click="selectedUser = null" class="text-gray-600 hover:text-white text-xl leading-none transition">✕</button>
+            </div>
+            <div class="p-5 space-y-3 text-xs">
+                <div class="grid grid-cols-2 gap-3">
+                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]">
+                        <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">이름</p>
+                        <p class="text-gray-300 font-bold">{{ selectedUser.user_metadata?.name || '-' }}</p>
+                    </div>
+                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]">
+                        <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">전화번호</p>
+                        <p class="text-gray-300 font-bold">{{ selectedUser.user_metadata?.phone || '-' }}</p>
+                    </div>
+                    <div class="bg-[#111] p-3 rounded-xl border border-[#222] col-span-2">
+                        <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">주소</p>
+                        <p class="text-gray-300 font-bold">
+                            {{ selectedUser.user_metadata?.postcode ? '[' + selectedUser.user_metadata.postcode + '] ' : '' }}
+                            {{ selectedUser.user_metadata?.address || '-' }}
+                            {{ selectedUser.user_metadata?.address_detail || '' }}
+                        </p>
+                    </div>
+                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]">
+                        <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">통관부호</p>
+                        <p class="text-gray-300 font-mono font-bold">{{ selectedUser.user_metadata?.customs_code || '-' }}</p>
+                    </div>
+                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]">
+                        <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">이메일 인증</p>
+                        <p :class="selectedUser.email_confirmed_at ? 'text-green-400' : 'text-red-400'" class="font-bold">
+                            {{ selectedUser.email_confirmed_at ? '✓ 완료' : '✗ 미인증' }}
+                        </p>
+                    </div>
+                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]">
+                        <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">가입일</p>
+                        <p class="text-gray-300">{{ formatDate(selectedUser.created_at) }}</p>
+                    </div>
+                    <div class="bg-[#111] p-3 rounded-xl border border-[#222]">
+                        <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">마지막 로그인</p>
+                        <p class="text-gray-300">{{ formatDate(selectedUser.last_sign_in_at) }}</p>
+                    </div>
+                </div>
+                <!-- 약관 동의 현황 -->
+                <div class="bg-[#111] p-3 rounded-xl border border-[#222] space-y-1.5">
+                    <p class="text-[10px] text-gray-600 font-bold tracking-wider mb-2">약관 동의 현황</p>
+                    <div class="flex flex-wrap gap-1.5">
+                        <span :class="selectedUser.user_metadata?.terms_service ? 'bg-green-900/60 text-green-400' : 'bg-[#222] text-gray-600'"
+                              class="text-[9px] font-bold px-2 py-0.5 rounded">이용약관</span>
+                        <span :class="selectedUser.user_metadata?.terms_privacy ? 'bg-green-900/60 text-green-400' : 'bg-[#222] text-gray-600'"
+                              class="text-[9px] font-bold px-2 py-0.5 rounded">개인정보수집</span>
+                        <span :class="selectedUser.user_metadata?.terms_thirdparty ? 'bg-green-900/60 text-green-400' : 'bg-[#222] text-gray-600'"
+                              class="text-[9px] font-bold px-2 py-0.5 rounded">제3자제공</span>
+                        <span :class="selectedUser.user_metadata?.terms_marketing ? 'bg-blue-900/60 text-blue-400' : 'bg-[#222] text-gray-600'"
+                              class="text-[9px] font-bold px-2 py-0.5 rounded">마케팅(선택)</span>
+                    </div>
+                </div>
+            </div>
+            <div class="px-5 pb-5">
+                <button @click="kickUser(selectedUser)" class="btn-danger w-full py-2.5 text-center">🚫 이 회원 탈퇴 처리</button>
+            </div>
+        </div>
+    </div>
+
 </div>
 
 <script>
-const { createApp, ref, onMounted } = Vue;
+const { createApp, ref, computed, onMounted } = Vue;
 const { createClient } = supabase;
 
 const SUPABASE_URL  = 'https://ntexeskcthjnfafogknk.supabase.co';
@@ -317,27 +465,55 @@ createApp({
     setup() {
         const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
+        // ── auth ──────────────────────────────────────────────────
         const isAuthenticated = ref(false);
         const adminEmail      = ref('');
         const loginForm       = ref({ email: '', password: '' });
         const loginError      = ref('');
         const isLoggingIn     = ref(false);
 
+        // ── ui ────────────────────────────────────────────────────
         const adminTab       = ref('products');
         const isLoading      = ref(false);
         const isSaving       = ref(false);
         const uploadProgress = ref({ main: '', detail: '', notice: '', review: '' });
 
+        // ── data ──────────────────────────────────────────────────
         const categories           = ref(['의류', '가방', '신발', '시계', '악세서리', 'etc']);
         const allowedClothingSizes = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
         const products = ref([]);
         const notices  = ref([]);
         const reviews  = ref([]);
 
+        // ── 회원 관리 state ───────────────────────────────────────
+        const users         = ref([]);
+        const isUsersLoading = ref(false);
+        const userSearch    = ref('');
+        const selectedUser  = ref(null);
+
+        const filteredUsers = computed(() => {
+            if (!userSearch.value.trim()) return users.value;
+            const q = userSearch.value.toLowerCase();
+            return users.value.filter(u =>
+                (u.email || '').toLowerCase().includes(q) ||
+                (u.user_metadata?.name || '').toLowerCase().includes(q)
+            );
+        });
+
+        const newThisMonth = computed(() => {
+            const now = new Date();
+            return users.value.filter(u => {
+                const d = new Date(u.created_at);
+                return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear();
+            }).length;
+        });
+
+        // ── form state ────────────────────────────────────────────
         const newProduct = ref({ brand: '', name: '', category: '의류', price: null, description: '', sizes: [], use_box_option: false, box_price: 0, mainFile: null, mainPreview: '', detailFiles: [] });
         const newNotice  = ref({ title: '', content: '', noticeFile: null });
         const newReview  = ref({ author: '', product_name: '', content: '', reviewFile: null });
 
+        // ── auth ──────────────────────────────────────────────────
         const login = async () => {
             loginError.value  = '';
             isLoggingIn.value = true;
@@ -370,6 +546,7 @@ createApp({
             isLoading.value = false;
         };
 
+        // ── fetch ─────────────────────────────────────────────────
         async function fetchProducts() {
             const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
             if (error) { console.error(error); return; }
@@ -390,6 +567,62 @@ createApp({
             reviews.value = data || [];
         }
 
+        // ── 회원 조회 ─────────────────────────────────────────────
+        // ※ auth.users는 anon key로 직접 조회 불가 → profiles 테이블 or admin API 필요
+        // 아래는 Supabase admin listUsers API 사용 (서비스 롤 키 없이는 불가)
+        // → 대신 가입 시 user_metadata에서 저장된 정보를 auth.getUser()로 읽거나
+        //   별도 profiles 테이블을 조회합니다.
+        // 현재 구조에서는 profiles 테이블이 없으므로
+        // auth.admin.listUsers()는 서비스 롤 키가 필요 → 여기선 anon key 한계 안내 포함
+        const fetchUsers = async () => {
+            isUsersLoading.value = true;
+            // profiles 테이블이 있으면 우선 시도
+            const { data: profileData, error: profileError } = await sb.from('profiles').select('*').order('created_at', { ascending: false });
+            if (!profileError && profileData) {
+                // profiles 테이블 구조를 auth user 형태로 맞춤
+                users.value = profileData.map(p => ({
+                    id: p.id,
+                    email: p.email,
+                    email_confirmed_at: p.email_confirmed_at,
+                    created_at: p.created_at,
+                    last_sign_in_at: p.last_sign_in_at,
+                    user_metadata: {
+                        name: p.name,
+                        phone: p.phone,
+                        address: p.address,
+                        address_detail: p.address_detail,
+                        postcode: p.postcode,
+                        customs_code: p.customs_code,
+                        terms_service: p.terms_service,
+                        terms_privacy: p.terms_privacy,
+                        terms_thirdparty: p.terms_thirdparty,
+                        terms_marketing: p.terms_marketing,
+                    }
+                }));
+            } else {
+                // profiles 테이블 없음 → 현재 로그인 유저 정보만 표시
+                const { data: { user } } = await sb.auth.getUser();
+                users.value = user ? [user] : [];
+                if (users.value.length > 0) {
+                    console.warn('⚠️ profiles 테이블이 없습니다. 전체 회원 조회를 위해 Supabase 대시보드에서 profiles 테이블을 생성하거나 Service Role Key를 사용하세요.');
+                }
+            }
+            isUsersLoading.value = false;
+        };
+
+        const openUserDetail = (u) => { selectedUser.value = u; };
+
+        const kickUser = async (u) => {
+            if (!confirm(`${u.user_metadata?.name || u.email} 회원을 탈퇴 처리하시겠습니까?\n이 작업은 되돌릴 수 없습니다.`)) return;
+            // profiles 테이블에서 삭제 (있는 경우)
+            await sb.from('profiles').delete().eq('id', u.id);
+            // auth 유저 삭제는 Service Role Key 필요 → 안내
+            alert(`✅ ${u.email} 회원의 프로필 데이터가 삭제되었습니다.\n\n※ Supabase Auth 계정 완전 삭제는 Supabase 대시보드 > Authentication > Users에서 직접 처리해 주세요.`);
+            selectedUser.value = null;
+            await fetchUsers();
+        };
+
+        // ── Storage 업로드 ────────────────────────────────────────
         const uploadToStorage = async (file, folder, progressKey) => {
             const ext  = file.name.split('.').pop();
             const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
@@ -432,12 +665,12 @@ createApp({
             }
         };
 
+        // ── CRUD: 상품 ────────────────────────────────────────────
         const addProduct = async () => {
             if (!newProduct.value.brand || !newProduct.value.name || !newProduct.value.price) { alert('⚠️ 브랜드, 상품명, 가격은 필수입니다.'); return; }
             if (newProduct.value.category === '의류' && newProduct.value.sizes.length === 0) { alert('⚠️ 의류 사이즈를 선택해 주세요.'); return; }
             isSaving.value = true;
-            let image_url = null;
-            let detail_image_urls = [];
+            let image_url = null, detail_image_urls = [];
             if (newProduct.value.mainFile) image_url = await uploadToStorage(newProduct.value.mainFile, 'products/main', 'main');
             if (newProduct.value.detailFiles.length > 0) {
                 uploadProgress.value.detail = `0 / ${newProduct.value.detailFiles.length} 업로드 중...`;
@@ -447,12 +680,11 @@ createApp({
                     uploadProgress.value.detail = `${i + 1} / ${newProduct.value.detailFiles.length} 완료`;
                 }
             }
-            const payload = { brand: newProduct.value.brand, name: newProduct.value.name, category: newProduct.value.category, price: newProduct.value.price, description: newProduct.value.description, sizes: newProduct.value.sizes, use_box_option: newProduct.value.use_box_option, box_price: newProduct.value.box_price, image_url, detail_image_urls };
-            const { error } = await sb.from('products').insert([payload]);
+            const { error } = await sb.from('products').insert([{ brand: newProduct.value.brand, name: newProduct.value.name, category: newProduct.value.category, price: newProduct.value.price, description: newProduct.value.description, sizes: newProduct.value.sizes, use_box_option: newProduct.value.use_box_option, box_price: newProduct.value.box_price, image_url, detail_image_urls }]);
             isSaving.value = false;
             if (error) { alert('❌ 저장 실패: ' + error.message); return; }
             alert('✅ 상품이 등록되었습니다.');
-            newProduct.value    = { brand: '', name: '', category: '의류', price: null, description: '', sizes: [], use_box_option: false, box_price: 0, mainFile: null, mainPreview: '', detailFiles: [] };
+            newProduct.value     = { brand: '', name: '', category: '의류', price: null, description: '', sizes: [], use_box_option: false, box_price: 0, mainFile: null, mainPreview: '', detailFiles: [] };
             uploadProgress.value = { main: '', detail: '', notice: '', review: '' };
             await fetchProducts();
         };
@@ -461,13 +693,14 @@ createApp({
             if (!confirm('이 상품을 삭제할까요?')) return;
             const pathsToDelete = [];
             if (imageUrl) pathsToDelete.push(imageUrl.split(`${BUCKET}/`)[1]);
-            if (detailUrls && detailUrls.length > 0) detailUrls.forEach(u => { if (u) pathsToDelete.push(u.split(`${BUCKET}/`)[1]); });
+            if (detailUrls?.length > 0) detailUrls.forEach(u => { if (u) pathsToDelete.push(u.split(`${BUCKET}/`)[1]); });
             if (pathsToDelete.length > 0) await sb.storage.from(BUCKET).remove(pathsToDelete.filter(Boolean));
             const { error } = await sb.from('products').delete().eq('id', id);
             if (error) { alert('❌ 삭제 실패: ' + error.message); return; }
             products.value = products.value.filter(p => p.id !== id);
         };
 
+        // ── CRUD: 공지 ────────────────────────────────────────────
         const addNotice = async () => {
             if (!newNotice.value.title || !newNotice.value.content) { alert('⚠️ 제목과 내용을 입력해 주세요.'); return; }
             isSaving.value = true;
@@ -490,6 +723,7 @@ createApp({
             notices.value = notices.value.filter(n => n.id !== id);
         };
 
+        // ── CRUD: 리뷰 ────────────────────────────────────────────
         const addReview = async () => {
             if (!newReview.value.content) { alert('⚠️ 리뷰 내용을 입력해 주세요.'); return; }
             isSaving.value = true;
@@ -512,17 +746,27 @@ createApp({
             reviews.value = reviews.value.filter(r => r.id !== id);
         };
 
+        // ── helpers ───────────────────────────────────────────────
+        const formatDate = (dateStr) => {
+            if (!dateStr) return '-';
+            const d = new Date(dateStr);
+            return `${d.getFullYear()}.${String(d.getMonth()+1).padStart(2,'0')}.${String(d.getDate()).padStart(2,'0')}`;
+        };
+
         return {
             isAuthenticated, adminEmail, loginForm, loginError, isLoggingIn,
             adminTab, isLoading, isSaving, uploadProgress,
             categories, allowedClothingSizes, products, notices, reviews,
             newProduct, newNotice, newReview,
+            // 회원
+            users, isUsersLoading, userSearch, filteredUsers, selectedUser, newThisMonth,
             login, logout,
-            fetchProducts, fetchNotices, fetchReviews,
+            fetchProducts, fetchNotices, fetchReviews, fetchUsers,
             handleFileSelect, handleCategoryChange,
             addProduct, deleteProduct,
             addNotice, deleteNotice,
             addReview, deleteReview,
+            openUserDetail, kickUser, formatDate,
         };
     }
 }).mount('#app');
