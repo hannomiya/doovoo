@@ -125,9 +125,8 @@
                     </svg>
                 </div>
 
-                <!-- 로그인/유저 아이콘 -->
+                <!-- 비로그인: 사람 아이콘 -->
                 <div class="relative" ref="userMenuRef">
-                    <!-- 비로그인: 사람 아이콘 -->
                     <button v-if="!currentUser" @click="openAuthModal('login')"
                             class="w-8 h-8 flex items-center justify-center rounded-full border border-[#D8D2C6] bg-[#FAF7F0] hover:border-[#6D6456] hover:bg-white transition-all group"
                             title="로그인 / 회원가입">
@@ -347,7 +346,7 @@
     <div v-if="showAuthModal" class="auth-overlay" @click.self="closeAuthModal">
         <div class="auth-modal">
 
-            <!-- 탭 헤더 (로그인일 때만) -->
+            <!-- 탭 헤더 (로그인) -->
             <div v-if="authTab === 'login'" class="flex border-b border-[#EAE5D9]">
                 <button class="auth-tab-btn active">로그인</button>
                 <button @click="startRegister" class="auth-tab-btn">회원가입</button>
@@ -368,6 +367,7 @@
             </div>
 
             <div class="p-6 space-y-4">
+
                 <!-- 브랜드 -->
                 <div v-if="authTab === 'login'" class="text-center mb-2">
                     <span class="text-[10px] tracking-[0.25em] font-black text-[#8B7355]">DOOVOO STREET</span>
@@ -449,14 +449,12 @@
                     <p class="text-[11px] text-gray-500 leading-relaxed">서비스 이용을 위한 약관에 동의해 주세요. 필수 항목에 모두 동의해야 가입이 완료됩니다.</p>
 
                     <div class="terms-box">
-                        <!-- 전체 동의 -->
                         <div class="terms-row all" @click="toggleAllTerms">
                             <div :class="['terms-check', allTermsChecked ? 'checked' : '']">
                                 <svg v-if="allTermsChecked" width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
                             </div>
                             <span>전체 동의하기</span>
                         </div>
-                        <!-- 이용약관 (필수) -->
                         <div class="terms-row" @click="terms.service = !terms.service">
                             <div :class="['terms-check', terms.service ? 'checked' : '']">
                                 <svg v-if="terms.service" width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -464,7 +462,6 @@
                             <span>[필수] 이용약관 동의</span>
                             <span class="terms-link" @click.stop="openTermsModal('service')">보기</span>
                         </div>
-                        <!-- 개인정보 수집 (필수) -->
                         <div class="terms-row" @click="terms.privacy = !terms.privacy">
                             <div :class="['terms-check', terms.privacy ? 'checked' : '']">
                                 <svg v-if="terms.privacy" width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -472,7 +469,6 @@
                             <span>[필수] 개인정보 수집 및 이용 동의</span>
                             <span class="terms-link" @click.stop="openTermsModal('privacy')">보기</span>
                         </div>
-                        <!-- 개인정보 제3자 제공 (필수) -->
                         <div class="terms-row" @click="terms.thirdparty = !terms.thirdparty">
                             <div :class="['terms-check', terms.thirdparty ? 'checked' : '']">
                                 <svg v-if="terms.thirdparty" width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -480,7 +476,6 @@
                             <span>[필수] 개인정보 제3자 제공 동의</span>
                             <span class="terms-link" @click.stop="openTermsModal('thirdparty')">보기</span>
                         </div>
-                        <!-- 마케팅 (선택) -->
                         <div class="terms-row" @click="terms.marketing = !terms.marketing">
                             <div :class="['terms-check', terms.marketing ? 'checked' : '']">
                                 <svg v-if="terms.marketing" width="10" height="8" viewBox="0 0 10 8" fill="none"><path d="M1 4L3.5 6.5L9 1" stroke="white" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -492,9 +487,7 @@
 
                     <div class="flex gap-2">
                         <button @click="registerStep = 1" class="flex-1 py-2.5 rounded-xl border border-[#E8E4DC] text-xs font-bold text-gray-500 hover:bg-gray-50 transition">이전</button>
-                        <button @click="goToStep3" :disabled="!requiredTermsChecked" class="auth-btn flex-[2]">
-                            다음 — 추가 정보 입력
-                        </button>
+                        <button @click="goToStep3" :disabled="!requiredTermsChecked" class="auth-btn flex-[2]">다음 — 추가 정보 입력</button>
                     </div>
                 </div>
 
@@ -502,20 +495,16 @@
                 <div v-if="authTab === 'register' && registerStep === 3" class="space-y-3">
                     <p class="text-[11px] text-gray-400">주문 처리 및 통관에 필요한 정보를 입력해 주세요.</p>
 
-                    <!-- 이름 -->
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 mb-1 tracking-wider">이름 *</label>
                         <input v-model="profileForm.name" type="text" placeholder="실명을 입력해 주세요" class="auth-input">
                     </div>
 
-                    <!-- 전화번호 -->
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 mb-1 tracking-wider">전화번호 *</label>
-                        <input v-model="profileForm.phone" type="tel" placeholder="010-0000-0000" class="auth-input"
-                               @input="formatPhone">
+                        <input v-model="profileForm.phone" type="tel" placeholder="010-0000-0000" class="auth-input" @input="formatPhone">
                     </div>
 
-                    <!-- 주소 -->
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 mb-1 tracking-wider">주소 *</label>
                         <div class="flex gap-2 mb-1.5">
@@ -529,7 +518,6 @@
                         <input v-model="profileForm.addressDetail" type="text" placeholder="상세 주소 (동/호수 등)" class="auth-input">
                     </div>
 
-                    <!-- 통관부호 -->
                     <div>
                         <label class="block text-[10px] font-bold text-gray-500 mb-1 tracking-wider">
                             개인통관고유부호
@@ -618,7 +606,7 @@ createApp({
     setup() {
         const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-        // ── 기존 state ─────────────────────────────────────────
+        // ── 기본 state ────────────────────────────────────────────
         const currentTab       = ref('shop');
         const selectedCategory = ref('ALL');
         const searchQuery      = ref('');
@@ -631,23 +619,23 @@ createApp({
         const notices    = ref([]);
         const reviews    = ref([]);
 
-        // ── Auth state ─────────────────────────────────────────
-        const currentUser    = ref(null);
-        const showAuthModal  = ref(false);
-        const authTab        = ref('login');
-        const isAuthLoading  = ref(false);
-        const authError      = ref('');
-        const authSuccess    = ref('');
-        const authForm       = ref({ email: '', password: '', passwordConfirm: '' });
-        const showUserMenu   = ref(false);
-        const userMenuRef    = ref(null);
+        // ── Auth state ────────────────────────────────────────────
+        const currentUser   = ref(null);
+        const showAuthModal = ref(false);
+        const authTab       = ref('login');
+        const isAuthLoading = ref(false);
+        const authError     = ref('');
+        const authSuccess   = ref('');
+        const authForm      = ref({ email: '', password: '', passwordConfirm: '' });
+        const showUserMenu  = ref(false);
+        const userMenuRef   = ref(null);
 
-        // ── 회원가입 스텝 state ────────────────────────────────
+        // ── 회원가입 스텝 state ───────────────────────────────────
         const registerStep = ref(1);
 
         // 약관
         const terms = ref({ service: false, privacy: false, thirdparty: false, marketing: false });
-        const allTermsChecked = computed(() => terms.value.service && terms.value.privacy && terms.value.thirdparty && terms.value.marketing);
+        const allTermsChecked     = computed(() => terms.value.service && terms.value.privacy && terms.value.thirdparty && terms.value.marketing);
         const requiredTermsChecked = computed(() => terms.value.service && terms.value.privacy && terms.value.thirdparty);
 
         const toggleAllTerms = () => {
@@ -656,7 +644,7 @@ createApp({
         };
 
         // 약관 상세 모달
-        const showTermsDetail   = ref(false);
+        const showTermsDetail    = ref(false);
         const termsDetailTitle   = ref('');
         const termsDetailContent = ref('');
         const openTermsModal = (key) => {
@@ -673,30 +661,38 @@ createApp({
             return currentUser.value.email[0].toUpperCase();
         });
 
-        // ── 세션 복원 ───────────────────────────────────────────
+        // ── 세션 복원 ─────────────────────────────────────────────
         onMounted(async () => {
             const { data: { session } } = await sb.auth.getSession();
             if (session) currentUser.value = session.user;
+
             sb.auth.onAuthStateChange((_event, session) => {
                 currentUser.value = session?.user ?? null;
             });
+
             document.addEventListener('click', handleOutsideClick);
+
             isLoading.value = true;
             await Promise.all([fetchProducts(), fetchNotices(), fetchReviews()]);
             isLoading.value = false;
         });
-        onUnmounted(() => { document.removeEventListener('click', handleOutsideClick); });
+
+        onUnmounted(() => {
+            document.removeEventListener('click', handleOutsideClick);
+        });
 
         const handleOutsideClick = (e) => {
-            if (userMenuRef.value && !userMenuRef.value.contains(e.target)) showUserMenu.value = false;
+            if (userMenuRef.value && !userMenuRef.value.contains(e.target)) {
+                showUserMenu.value = false;
+            }
         };
 
-        // ── Auth 모달 제어 ─────────────────────────────────────
+        // ── Auth 모달 제어 ────────────────────────────────────────
         const openAuthModal = (tab = 'login') => {
-            authTab.value      = tab;
-            authError.value    = '';
-            authSuccess.value  = '';
-            authForm.value     = { email: '', password: '', passwordConfirm: '' };
+            authTab.value       = tab;
+            authError.value     = '';
+            authSuccess.value   = '';
+            authForm.value      = { email: '', password: '', passwordConfirm: '' };
             showAuthModal.value = true;
             showUserMenu.value  = false;
         };
@@ -729,59 +725,61 @@ createApp({
             registerStep.value = 3;
         };
 
-        // ── 전화번호 자동 포맷 ─────────────────────────────────
+        // ── 전화번호 자동 포맷 ────────────────────────────────────
         const formatPhone = () => {
             let v = profileForm.value.phone.replace(/\D/g, '');
-            if (v.length <= 3) profileForm.value.phone = v;
-            else if (v.length <= 7) profileForm.value.phone = `${v.slice(0,3)}-${v.slice(3)}`;
-            else profileForm.value.phone = `${v.slice(0,3)}-${v.slice(3,7)}-${v.slice(7,11)}`;
+            if (v.length <= 3)       profileForm.value.phone = v;
+            else if (v.length <= 7)  profileForm.value.phone = `${v.slice(0,3)}-${v.slice(3)}`;
+            else                     profileForm.value.phone = `${v.slice(0,3)}-${v.slice(3,7)}-${v.slice(7,11)}`;
         };
 
-        // ── 카카오 주소 검색 ───────────────────────────────────
+        // ── 카카오 주소 검색 ──────────────────────────────────────
         const openPostcode = () => {
             new daum.Postcode({
                 oncomplete(data) {
                     profileForm.value.postcode = data.zonecode;
                     profileForm.value.address  = data.roadAddress || data.jibunAddress;
-                    // 상세주소 input 포커스
                     const el = document.querySelector('input[placeholder="상세 주소 (동/호수 등)"]');
                     if (el) el.focus();
                 }
             }).open();
         };
 
-        // ── 로그인 ─────────────────────────────────────────────
+        // ── 로그인 ────────────────────────────────────────────────
         const handleLogin = async () => {
             authError.value = '';
             if (!authForm.value.email || !authForm.value.password) { authError.value = '이메일과 비밀번호를 입력해 주세요.'; return; }
             isAuthLoading.value = true;
             const { error } = await sb.auth.signInWithPassword({ email: authForm.value.email, password: authForm.value.password });
             isAuthLoading.value = false;
-            if (error) { authError.value = error.message.includes('Invalid login') ? '이메일 또는 비밀번호가 올바르지 않습니다.' : error.message; return; }
+            if (error) {
+                authError.value = error.message.includes('Invalid login') ? '이메일 또는 비밀번호가 올바르지 않습니다.' : error.message;
+                return;
+            }
             closeAuthModal();
         };
 
-        // ── 회원가입 최종 제출 (STEP 3) ────────────────────────
+        // ── 회원가입 최종 제출 (STEP 3) ──────────────────────────
         const handleRegister = async () => {
             authError.value = '';
-            if (!profileForm.value.name) { authError.value = '이름을 입력해 주세요.'; return; }
-            if (!profileForm.value.phone) { authError.value = '전화번호를 입력해 주세요.'; return; }
+            if (!profileForm.value.name)    { authError.value = '이름을 입력해 주세요.'; return; }
+            if (!profileForm.value.phone)   { authError.value = '전화번호를 입력해 주세요.'; return; }
             if (!profileForm.value.address) { authError.value = '주소를 검색해 주세요.'; return; }
             if (profileForm.value.customsCode && !/^P\d{12}$/i.test(profileForm.value.customsCode)) {
                 authError.value = '개인통관고유부호 형식이 올바르지 않습니다. (P + 12자리 숫자)'; return;
             }
             isAuthLoading.value = true;
-            const { data, error } = await sb.auth.signUp({
+            const { error } = await sb.auth.signUp({
                 email:    authForm.value.email,
                 password: authForm.value.password,
                 options: {
                     data: {
-                        name:         profileForm.value.name,
-                        phone:        profileForm.value.phone,
-                        postcode:     profileForm.value.postcode,
-                        address:      profileForm.value.address,
-                        address_detail: profileForm.value.addressDetail,
-                        customs_code: profileForm.value.customsCode,
+                        name:             profileForm.value.name,
+                        phone:            profileForm.value.phone,
+                        postcode:         profileForm.value.postcode,
+                        address:          profileForm.value.address,
+                        address_detail:   profileForm.value.addressDetail,
+                        customs_code:     profileForm.value.customsCode,
                         terms_service:    terms.value.service,
                         terms_privacy:    terms.value.privacy,
                         terms_thirdparty: terms.value.thirdparty,
@@ -791,29 +789,29 @@ createApp({
             });
             isAuthLoading.value = false;
             if (error) { authError.value = error.message; return; }
-            authSuccess.value = '✅ 가입이 완료됐어요! 이메일 인증 후 로그인하실 수 있습니다.';
+            authSuccess.value  = '✅ 가입이 완료됐어요! 이메일 인증 후 로그인하실 수 있습니다.';
             registerStep.value = 1;
             authTab.value      = 'login';
             authForm.value     = { email: '', password: '', passwordConfirm: '' };
         };
 
-        // ── 소셜 로그인 ────────────────────────────────────────
+        // ── 소셜 로그인 ───────────────────────────────────────────
         const handleSocialLogin = async (provider) => {
-            authError.value = '';
+            authError.value     = '';
             isAuthLoading.value = true;
-            const redirectTo = window.location.href.split('?')[0];
-            const { error } = await sb.auth.signInWithOAuth({ provider, options: { redirectTo } });
+            const redirectTo    = window.location.href.split('?')[0];
+            const { error }     = await sb.auth.signInWithOAuth({ provider, options: { redirectTo } });
             isAuthLoading.value = false;
-            if (error) { authError.value = error.message; }
+            if (error) authError.value = error.message;
         };
 
-        // ── 로그아웃 ───────────────────────────────────────────
+        // ── 로그아웃 ──────────────────────────────────────────────
         const handleLogout = async () => {
             await sb.auth.signOut();
             showUserMenu.value = false;
         };
 
-        // ── fetch ──────────────────────────────────────────────
+        // ── fetch ─────────────────────────────────────────────────
         async function fetchProducts() {
             const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
             if (error) { console.error(error); return; }
@@ -823,11 +821,13 @@ createApp({
                 detail_image_urls: Array.isArray(p.detail_image_urls) ? p.detail_image_urls : (p.detail_image_urls ? JSON.parse(p.detail_image_urls) : []),
             }));
         }
+
         async function fetchNotices() {
             const { data, error } = await sb.from('notices').select('*').order('created_at', { ascending: false });
             if (error) { console.error(error); return; }
             notices.value = data || [];
         }
+
         async function fetchReviews() {
             const { data, error } = await sb.from('reviews').select('*').order('created_at', { ascending: false });
             if (error) { console.error(error); return; }
@@ -843,7 +843,7 @@ createApp({
             isLoading.value = false;
         };
 
-        // ── computed ───────────────────────────────────────────
+        // ── computed ──────────────────────────────────────────────
         const filteredProducts = computed(() => {
             let r = products.value;
             if (selectedCategory.value !== 'ALL') r = r.filter(p => p.category === selectedCategory.value);
@@ -861,10 +861,15 @@ createApp({
             return t;
         });
 
-        // ── helpers ────────────────────────────────────────────
+        // ── helpers ───────────────────────────────────────────────
         const triggerSearch     = () => { if (currentTab.value !== 'shop') navigateTo('shop'); };
         const formatPrice       = (v) => v ? Number(v).toLocaleString() : 0;
-        const openSignalChannel = () => alert('시그널 메신저 상담 채널로 연결합니다.');
+        // ★ 여기에 실제 Signal 채널 URL을 넣어주세요
+        const SIGNAL_CHANNEL_URL = '';
+        const openSignalChannel = () => {
+            if (SIGNAL_CHANNEL_URL) window.open(SIGNAL_CHANNEL_URL, '_blank');
+            else alert('시그널 채널 URL을 설정해 주세요.');
+        };
 
         const goToDetailView = (product) => {
             activeProduct.value = product;
@@ -875,6 +880,7 @@ createApp({
 
         const submitPayment = () => {
             if (!orderOptions.value.size) { alert('⚠️ 사이즈를 선택해 주세요!'); return; }
+            // ★ 실제 결제 로직 연동 필요 (Toss Payments / PortOne 등)
             alert(`🎉 총 ${calculatedTotalPrice.value.toLocaleString()}원 주문이 완료되었습니다.`);
             currentTab.value = 'shop';
         };
@@ -897,217 +903,6 @@ createApp({
             terms, allTermsChecked, requiredTermsChecked, toggleAllTerms,
             showTermsDetail, termsDetailTitle, termsDetailContent, openTermsModal,
             profileForm, formatPhone, openPostcode,
-        };
-    }
-}).mount('#app');
-</script>
-
-const SUPABASE_URL  = 'https://ntexeskcthjnfafogknk.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50ZXhlc2tjdGhqbmZhZm9na25rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMzExMjEsImV4cCI6MjA5NTcwNzEyMX0.qz9hqjP_-wYFUeGmbC3mh0ZPEQsPUKAAxJYUHeviauY';
-
-createApp({
-    setup() {
-        const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
-
-        // ── 기존 state ──────────────────────────────────────────
-        const currentTab       = ref('shop');
-        const selectedCategory = ref('ALL');
-        const searchQuery      = ref('');
-        const isLoading        = ref(false);
-        const activeProduct    = ref(null);
-        const orderOptions     = ref({ size: '', custom: '', addBox: false });
-
-        const categories = ref(['의류', '가방', '신발', '시계', '악세서리', 'etc']);
-        const products   = ref([]);
-        const notices    = ref([]);
-        const reviews    = ref([]);
-
-        // ── Auth state ─────────────────────────────────────────
-        const currentUser    = ref(null);
-        const showAuthModal  = ref(false);
-        const authTab        = ref('login');
-        const isAuthLoading  = ref(false);
-        const authError      = ref('');
-        const authSuccess    = ref('');
-        const authForm       = ref({ email: '', password: '', passwordConfirm: '' });
-
-        const showUserMenu   = ref(false);
-        const userMenuRef    = ref(null);
-
-        const userInitial = computed(() => {
-            if (!currentUser.value?.email) return '?';
-            return currentUser.value.email[0].toUpperCase();
-        });
-
-        // ── Auth: 세션 복원 + 변화 감지 ───────────────────────
-        onMounted(async () => {
-            const { data: { session } } = await sb.auth.getSession();
-            if (session) currentUser.value = session.user;
-
-            sb.auth.onAuthStateChange((_event, session) => {
-                currentUser.value = session?.user ?? null;
-            });
-
-            // 외부 클릭 시 드롭다운 닫기
-            document.addEventListener('click', handleOutsideClick);
-
-            isLoading.value = true;
-            await Promise.all([fetchProducts(), fetchNotices(), fetchReviews()]);
-            isLoading.value = false;
-        });
-
-        onUnmounted(() => {
-            document.removeEventListener('click', handleOutsideClick);
-        });
-
-        const handleOutsideClick = (e) => {
-            if (userMenuRef.value && !userMenuRef.value.contains(e.target)) {
-                showUserMenu.value = false;
-            }
-        };
-
-        // ── Auth: 모달 ────────────────────────────────────────
-        const openAuthModal = (tab = 'login') => {
-            authTab.value      = tab;
-            authError.value    = '';
-            authSuccess.value  = '';
-            authForm.value     = { email: '', password: '', passwordConfirm: '' };
-            showAuthModal.value = true;
-            showUserMenu.value  = false;
-        };
-        const closeAuthModal = () => { showAuthModal.value = false; };
-        const toggleUserMenu = () => { showUserMenu.value = !showUserMenu.value; };
-
-        // ── Auth: 로그인 ───────────────────────────────────────
-        const handleLogin = async () => {
-            authError.value   = '';
-            authSuccess.value = '';
-            if (!authForm.value.email || !authForm.value.password) { authError.value = '이메일과 비밀번호를 입력해 주세요.'; return; }
-            isAuthLoading.value = true;
-            const { error } = await sb.auth.signInWithPassword({ email: authForm.value.email, password: authForm.value.password });
-            isAuthLoading.value = false;
-            if (error) {
-                authError.value = error.message.includes('Invalid login') ? '이메일 또는 비밀번호가 올바르지 않습니다.' : error.message;
-                return;
-            }
-            closeAuthModal();
-        };
-
-        // ── Auth: 회원가입 ─────────────────────────────────────
-        const handleRegister = async () => {
-            authError.value   = '';
-            authSuccess.value = '';
-            if (!authForm.value.email || !authForm.value.password) { authError.value = '이메일과 비밀번호를 입력해 주세요.'; return; }
-            if (authForm.value.password.length < 6) { authError.value = '비밀번호는 6자 이상이어야 합니다.'; return; }
-            if (authForm.value.password !== authForm.value.passwordConfirm) { authError.value = '비밀번호가 일치하지 않습니다.'; return; }
-            isAuthLoading.value = true;
-            const { error } = await sb.auth.signUp({ email: authForm.value.email, password: authForm.value.password });
-            isAuthLoading.value = false;
-            if (error) { authError.value = error.message; return; }
-            authSuccess.value = '✅ 가입 완료! 이메일 인증 후 로그인하실 수 있습니다.';
-            authForm.value = { email: '', password: '', passwordConfirm: '' };
-        };
-
-        // ── Auth: 소셜 로그인 (Google / Kakao) ────────────────
-        const handleSocialLogin = async (provider) => {
-            authError.value   = '';
-            authSuccess.value = '';
-            isAuthLoading.value = true;
-            const redirectTo = window.location.href.split('?')[0]; // 현재 페이지로 리다이렉트
-            const { error } = await sb.auth.signInWithOAuth({
-                provider,
-                options: { redirectTo },
-            });
-            isAuthLoading.value = false;
-            if (error) { authError.value = error.message; }
-            // 성공 시 브라우저가 OAuth 페이지로 자동 이동함
-        };
-
-        // ── Auth: 로그아웃 ─────────────────────────────────────
-        const handleLogout = async () => {
-            await sb.auth.signOut();
-            showUserMenu.value = false;
-        };
-
-        // ── fetch ──────────────────────────────────────────────
-        async function fetchProducts() {
-            const { data, error } = await sb.from('products').select('*').order('created_at', { ascending: false });
-            if (error) { console.error(error); return; }
-            products.value = (data || []).map(p => ({
-                ...p,
-                sizes:             Array.isArray(p.sizes)             ? p.sizes             : (p.sizes             ? JSON.parse(p.sizes)             : []),
-                detail_image_urls: Array.isArray(p.detail_image_urls) ? p.detail_image_urls : (p.detail_image_urls ? JSON.parse(p.detail_image_urls) : []),
-            }));
-        }
-        async function fetchNotices() {
-            const { data, error } = await sb.from('notices').select('*').order('created_at', { ascending: false });
-            if (error) { console.error(error); return; }
-            notices.value = data || [];
-        }
-        async function fetchReviews() {
-            const { data, error } = await sb.from('reviews').select('*').order('created_at', { ascending: false });
-            if (error) { console.error(error); return; }
-            reviews.value = data || [];
-        }
-
-        const navigateTo = async (tab) => {
-            currentTab.value = tab;
-            isLoading.value  = true;
-            if (tab === 'shop')   await fetchProducts();
-            if (tab === 'notice') await fetchNotices();
-            if (tab === 'review') await fetchReviews();
-            isLoading.value = false;
-        };
-
-        // ── computed ───────────────────────────────────────────
-        const filteredProducts = computed(() => {
-            let r = products.value;
-            if (selectedCategory.value !== 'ALL') r = r.filter(p => p.category === selectedCategory.value);
-            if (searchQuery.value.trim()) {
-                const q = searchQuery.value.toLowerCase();
-                r = r.filter(p => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
-            }
-            return r;
-        });
-
-        const calculatedTotalPrice = computed(() => {
-            if (!activeProduct.value) return 0;
-            let t = activeProduct.value.price;
-            if (activeProduct.value.use_box_option && orderOptions.value.addBox) t += activeProduct.value.box_price;
-            return t;
-        });
-
-        // ── helpers ────────────────────────────────────────────
-        const triggerSearch     = () => { if (currentTab.value !== 'shop') navigateTo('shop'); };
-        const formatPrice       = (v) => v ? Number(v).toLocaleString() : 0;
-        const openSignalChannel = () => alert('시그널 메신저 상담 채널로 연결합니다.');
-
-        const goToDetailView = (product) => {
-            activeProduct.value = product;
-            orderOptions.value  = { size: '', custom: '', addBox: false };
-            currentTab.value    = 'product_detail';
-            window.scrollTo({ top: 0, behavior: 'smooth' });
-        };
-
-        const submitPayment = () => {
-            if (!orderOptions.value.size) { alert('⚠️ 사이즈를 선택해 주세요!'); return; }
-            alert(`🎉 총 ${calculatedTotalPrice.value.toLocaleString()}원 주문이 완료되었습니다.`);
-            currentTab.value = 'shop';
-        };
-
-        return {
-            currentTab, selectedCategory, searchQuery, isLoading,
-            activeProduct, orderOptions,
-            categories, products, notices, reviews,
-            filteredProducts, calculatedTotalPrice,
-            triggerSearch, formatPrice, openSignalChannel,
-            goToDetailView, submitPayment, navigateTo,
-            // auth
-            currentUser, showAuthModal, authTab, isAuthLoading,
-            authError, authSuccess, authForm,
-            showUserMenu, userMenuRef, userInitial,
-            openAuthModal, closeAuthModal, toggleUserMenu,
-            handleLogin, handleRegister, handleLogout, handleSocialLogin,
         };
     }
 }).mount('#app');
