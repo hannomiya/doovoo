@@ -75,7 +75,7 @@
                     <span class="badge" style="background:#1a2e1a; color:#4ade80;">● LIVE</span>
                 </div>
                 <div class="flex items-center gap-3">
-                    <a href="doovoo_shop.html" target="_blank" class="text-[11px] text-gray-500 hover:text-white transition flex items-center gap-1">
+                    <a href="index.html" target="_blank" class="text-[11px] text-gray-500 hover:text-white transition flex items-center gap-1">
                         🛒 스토어 보기 ↗
                     </a>
                     <button @click="logout" class="text-[11px] text-gray-600 hover:text-red-400 transition font-bold">로그아웃</button>
@@ -309,72 +309,61 @@
 const { createApp, ref, onMounted } = Vue;
 const { createClient } = supabase;
 
-// ─────────────────────────────────────────────────────────────
-// ★ Supabase 프로젝트 URL과 anon key
-// ─────────────────────────────────────────────────────────────
 const SUPABASE_URL  = 'https://ntexeskcthjnfafogknk.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50ZXhlc2tjdGhqbmZhZm9na25rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMzExMjEsImV4cCI6MjA5NTcwNzEyMX0.qz9hqjP_-wYFUeGmbC3mh0ZPEQsPUKAAxJYUHeviauY';
-
-// ★ Storage bucket 이름 (아래 가이드 보고 생성한 뒤 이름 맞춰주세요)
 const BUCKET = 'doovoo-images';
 
 createApp({
     setup() {
         const sb = createClient(SUPABASE_URL, SUPABASE_ANON);
 
-        // ── auth state ──────────────────────────────────────────
         const isAuthenticated = ref(false);
         const adminEmail      = ref('');
         const loginForm       = ref({ email: '', password: '' });
         const loginError      = ref('');
         const isLoggingIn     = ref(false);
 
-        // ── ui state ────────────────────────────────────────────
-        const adminTab    = ref('products');
-        const isLoading   = ref(false);
-        const isSaving    = ref(false);
+        const adminTab       = ref('products');
+        const isLoading      = ref(false);
+        const isSaving       = ref(false);
         const uploadProgress = ref({ main: '', detail: '', notice: '', review: '' });
 
-        // ── data ────────────────────────────────────────────────
-        const categories = ref(['의류', '가방', '신발', '시계', '악세서리', 'etc']);
+        const categories           = ref(['의류', '가방', '신발', '시계', '악세서리', 'etc']);
         const allowedClothingSizes = ['XS', 'S', 'M', 'L', 'XL', '2XL', '3XL'];
         const products = ref([]);
         const notices  = ref([]);
         const reviews  = ref([]);
 
-        // ── form state ──────────────────────────────────────────
         const newProduct = ref({ brand: '', name: '', category: '의류', price: null, description: '', sizes: [], use_box_option: false, box_price: 0, mainFile: null, mainPreview: '', detailFiles: [] });
         const newNotice  = ref({ title: '', content: '', noticeFile: null });
         const newReview  = ref({ author: '', product_name: '', content: '', reviewFile: null });
 
-        // ── auth ────────────────────────────────────────────────
         const login = async () => {
-            loginError.value = '';
+            loginError.value  = '';
             isLoggingIn.value = true;
             const { data, error } = await sb.auth.signInWithPassword({ email: loginForm.value.email, password: loginForm.value.password });
             isLoggingIn.value = false;
             if (error) { loginError.value = '로그인 실패: ' + (error.message === 'Invalid login credentials' ? '이메일 또는 비밀번호가 올바르지 않습니다.' : error.message); return; }
             isAuthenticated.value = true;
-            adminEmail.value = data.user.email;
+            adminEmail.value      = data.user.email;
             loadAll();
         };
 
         const logout = async () => {
             await sb.auth.signOut();
             isAuthenticated.value = false;
-            adminEmail.value = '';
+            adminEmail.value      = '';
         };
 
         onMounted(async () => {
             const { data: { session } } = await sb.auth.getSession();
             if (session) {
                 isAuthenticated.value = true;
-                adminEmail.value = session.user.email;
+                adminEmail.value      = session.user.email;
                 loadAll();
             }
         });
 
-        // ── fetch ────────────────────────────────────────────────
         const loadAll = async () => {
             isLoading.value = true;
             await Promise.all([fetchProducts(), fetchNotices(), fetchReviews()]);
@@ -401,7 +390,6 @@ createApp({
             reviews.value = data || [];
         }
 
-        // ── Storage 업로드 헬퍼 ─────────────────────────────────
         const uploadToStorage = async (file, folder, progressKey) => {
             const ext  = file.name.split('.').pop();
             const path = `${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
@@ -413,40 +401,37 @@ createApp({
             return data.publicUrl;
         };
 
-        // ── 파일 선택 핸들러 ────────────────────────────────────
         const handleFileSelect = (event, type) => {
             const files = event.target.files;
             if (!files || files.length === 0) return;
             if (type === 'main') {
-                newProduct.value.mainFile = files[0];
+                newProduct.value.mainFile    = files[0];
                 newProduct.value.mainPreview = URL.createObjectURL(files[0]);
-                uploadProgress.value.main = '';
+                uploadProgress.value.main    = '';
             } else if (type === 'detail') {
                 newProduct.value.detailFiles = Array.from(files);
-                uploadProgress.value.detail = '';
+                uploadProgress.value.detail  = '';
             } else if (type === 'notice') {
-                newNotice.value.noticeFile = files[0];
+                newNotice.value.noticeFile  = files[0];
                 uploadProgress.value.notice = '';
             } else if (type === 'review') {
-                newReview.value.reviewFile = files[0];
+                newReview.value.reviewFile  = files[0];
                 uploadProgress.value.review = '';
             }
         };
 
-        // ── 카테고리 변경 ────────────────────────────────────────
         const handleCategoryChange = () => {
             if (newProduct.value.category !== '의류') {
-                newProduct.value.sizes = ['FREE'];
+                newProduct.value.sizes          = ['FREE'];
                 newProduct.value.use_box_option = ['시계', '가방', '악세서리'].includes(newProduct.value.category);
                 if (!newProduct.value.use_box_option) newProduct.value.box_price = 0;
             } else {
-                newProduct.value.sizes = [];
+                newProduct.value.sizes          = [];
                 newProduct.value.use_box_option = false;
-                newProduct.value.box_price = 0;
+                newProduct.value.box_price      = 0;
             }
         };
 
-        // ── CRUD: 상품 ───────────────────────────────────────────
         const addProduct = async () => {
             if (!newProduct.value.brand || !newProduct.value.name || !newProduct.value.price) { alert('⚠️ 브랜드, 상품명, 가격은 필수입니다.'); return; }
             if (newProduct.value.category === '의류' && newProduct.value.sizes.length === 0) { alert('⚠️ 의류 사이즈를 선택해 주세요.'); return; }
@@ -462,30 +447,18 @@ createApp({
                     uploadProgress.value.detail = `${i + 1} / ${newProduct.value.detailFiles.length} 완료`;
                 }
             }
-            const payload = {
-                brand:             newProduct.value.brand,
-                name:              newProduct.value.name,
-                category:          newProduct.value.category,
-                price:             newProduct.value.price,
-                description:       newProduct.value.description,
-                sizes:             newProduct.value.sizes,
-                use_box_option:    newProduct.value.use_box_option,
-                box_price:         newProduct.value.box_price,
-                image_url,
-                detail_image_urls,
-            };
+            const payload = { brand: newProduct.value.brand, name: newProduct.value.name, category: newProduct.value.category, price: newProduct.value.price, description: newProduct.value.description, sizes: newProduct.value.sizes, use_box_option: newProduct.value.use_box_option, box_price: newProduct.value.box_price, image_url, detail_image_urls };
             const { error } = await sb.from('products').insert([payload]);
             isSaving.value = false;
             if (error) { alert('❌ 저장 실패: ' + error.message); return; }
             alert('✅ 상품이 등록되었습니다.');
-            newProduct.value = { brand: '', name: '', category: '의류', price: null, description: '', sizes: [], use_box_option: false, box_price: 0, mainFile: null, mainPreview: '', detailFiles: [] };
+            newProduct.value    = { brand: '', name: '', category: '의류', price: null, description: '', sizes: [], use_box_option: false, box_price: 0, mainFile: null, mainPreview: '', detailFiles: [] };
             uploadProgress.value = { main: '', detail: '', notice: '', review: '' };
             await fetchProducts();
         };
 
         const deleteProduct = async (id, imageUrl, detailUrls) => {
             if (!confirm('이 상품을 삭제할까요?')) return;
-            // Storage 파일도 삭제
             const pathsToDelete = [];
             if (imageUrl) pathsToDelete.push(imageUrl.split(`${BUCKET}/`)[1]);
             if (detailUrls && detailUrls.length > 0) detailUrls.forEach(u => { if (u) pathsToDelete.push(u.split(`${BUCKET}/`)[1]); });
@@ -495,7 +468,6 @@ createApp({
             products.value = products.value.filter(p => p.id !== id);
         };
 
-        // ── CRUD: 공지 ────────────────────────────────────────────
         const addNotice = async () => {
             if (!newNotice.value.title || !newNotice.value.content) { alert('⚠️ 제목과 내용을 입력해 주세요.'); return; }
             isSaving.value = true;
@@ -505,7 +477,7 @@ createApp({
             isSaving.value = false;
             if (error) { alert('❌ 저장 실패: ' + error.message); return; }
             alert('✅ 공지사항이 발행되었습니다.');
-            newNotice.value = { title: '', content: '', noticeFile: null };
+            newNotice.value         = { title: '', content: '', noticeFile: null };
             uploadProgress.value.notice = '';
             await fetchNotices();
         };
@@ -518,7 +490,6 @@ createApp({
             notices.value = notices.value.filter(n => n.id !== id);
         };
 
-        // ── CRUD: 리뷰 ────────────────────────────────────────────
         const addReview = async () => {
             if (!newReview.value.content) { alert('⚠️ 리뷰 내용을 입력해 주세요.'); return; }
             isSaving.value = true;
@@ -528,7 +499,7 @@ createApp({
             isSaving.value = false;
             if (error) { alert('❌ 저장 실패: ' + error.message); return; }
             alert('✅ 리뷰가 등록되었습니다.');
-            newReview.value = { author: '', product_name: '', content: '', reviewFile: null };
+            newReview.value         = { author: '', product_name: '', content: '', reviewFile: null };
             uploadProgress.value.review = '';
             await fetchReviews();
         };
