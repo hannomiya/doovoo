@@ -237,8 +237,14 @@
                             </div>
                             <div class="space-y-4">
                                 <div>
-                                    <label class="block font-bold text-xs text-gray-600 mb-1.5">📏 사이즈 구성 <span class="text-red-500">*</span></label>
-                                    <select v-model="orderOptions.size" class="w-full p-3 border rounded-xl bg-[#FAF7F0] text-xs font-medium text-gray-700 focus:outline-none focus:border-[#6D6456]">
+                                    <label class="block font-bold text-xs text-gray-600 mb-1.5">📏 사이즈</label>
+                                    <!-- 단일 FREE 사이즈 -->
+                                    <div v-if="activeProduct.sizes && activeProduct.sizes.length === 1 && activeProduct.sizes[0] === 'FREE'"
+                                         class="w-full p-3 border border-[#E8E4DC] rounded-xl bg-[#FAF7F0] text-xs text-gray-500">
+                                        FREE SIZE (단일 사이즈)
+                                    </div>
+                                    <!-- 여러 사이즈 -->
+                                    <select v-else v-model="orderOptions.size" class="w-full p-3 border rounded-xl bg-[#FAF7F0] text-xs font-medium text-gray-700 focus:outline-none focus:border-[#6D6456]">
                                         <option value="">-- 사이즈를 선택해 주세요 --</option>
                                         <option v-for="sz in activeProduct.sizes" :key="sz" :value="sz">{{ sz }}</option>
                                     </select>
@@ -636,7 +642,7 @@ createApp({
         const isLoading        = ref(false);
         const activeProduct    = ref(null);
         const orderOptions     = ref({ size:'', custom:'', addBox:false });
-        const categories = ref(['의류','가방','신발','시계','악세서리','etc']);
+        const categories = ref(['시계','악세서리','etc']);
         const products   = ref([]);
         const notices    = ref([]);
         const reviews    = ref([]);
@@ -789,6 +795,10 @@ createApp({
 
         // 결제 플로우
         const startCheckout = () => {
+            // FREE 단일사이즈 자동 처리
+            if (activeProduct.value?.sizes?.length === 1) {
+                orderOptions.value.size = activeProduct.value.sizes[0];
+            }
             if (!orderOptions.value.size) { alert('⚠️ 사이즈를 선택해 주세요!'); return; }
             checkoutStep.value=1; orderType.value=currentUser.value?'member':''; checkoutError.value='';
             if (currentUser.value) {
@@ -1022,7 +1032,14 @@ createApp({
         const formatPrice    = (v) => v?Number(v).toLocaleString():0;
         const formatDate     = (d) => d?new Date(d).toLocaleString('ko-KR',{year:'numeric',month:'2-digit',day:'2-digit',hour:'2-digit',minute:'2-digit'}):'-';
         const openKakaoChat  = () => window.open(KAKAO_CHAT_URL,'_blank');
-        const goToDetailView = (product) => { activeProduct.value=product; orderOptions.value={size:'',custom:'',addBox:false}; currentTab.value='product_detail'; window.scrollTo({top:0,behavior:'smooth'}); };
+        const goToDetailView = (product) => {
+            activeProduct.value=product;
+            // FREE 단일사이즈면 자동 선택
+            const autoSize = (product.sizes && product.sizes.length === 1) ? product.sizes[0] : '';
+            orderOptions.value={size:autoSize,custom:'',addBox:false};
+            currentTab.value='product_detail';
+            window.scrollTo({top:0,behavior:'smooth'});
+        };
 
         return {
             currentTab, selectedCategory, searchQuery, isLoading, activeProduct, orderOptions,
