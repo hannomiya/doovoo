@@ -92,13 +92,24 @@
                         <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">카테고리</label><select v-model="newProduct.category" @change="handleCategoryChange" class="input"><option v-for="c in categories" :value="c">{{ c }}</option></select></div>
                         <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">판매가 (원) *</label><input v-model.number="newProduct.price" type="number" placeholder="0" class="input"></div>
                     </div>
-                    <div v-if="newProduct.category==='의류'" class="bg-[#111] p-3 rounded-lg border border-[#2a2a2a]">
-                        <span class="block text-[10px] font-black text-[#8B7355] mb-2 tracking-wider">SIZE MAPPING</span>
-                        <div class="flex flex-wrap gap-2">
-                            <label v-for="sz in allowedClothingSizes" :key="sz" class="flex items-center gap-1.5 text-[11px] text-gray-400 cursor-pointer"><input type="checkbox" :value="sz" v-model="newProduct.sizes" class="w-3 h-3 accent-[#8B7355]">{{ sz }}</label>
+                    <!-- 사이즈 매핑: 모든 카테고리, 직접 입력 최대 6개 -->
+                    <div class="bg-[#111] p-3 rounded-lg border border-[#2a2a2a]">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-[10px] font-black text-[#8B7355] tracking-wider">SIZE MAPPING</span>
+                            <span class="text-[9px] text-gray-600">단일 사이즈면 FREE 입력</span>
                         </div>
+                        <div class="grid grid-cols-3 gap-1.5">
+                            <input v-for="i in 6" :key="i"
+                                   v-model="newProduct.sizeInputs[i-1]"
+                                   type="text"
+                                   :placeholder="i===1?'FREE 또는 S':''"
+                                   class="input text-center"
+                                   style="padding:6px 4px;font-size:11px;"
+                                   @input="syncSizes">
+                        </div>
+                        <p class="text-[9px] text-gray-600 mt-1.5">입력된 사이즈: <span class="text-[#8B7355] font-bold">{{ newProduct.sizes.filter(s=>s).join(', ') || '없음' }}</span></p>
                     </div>
-                    <div v-if="['시계','가방','악세서리'].includes(newProduct.category)" class="bg-[#111] p-3 rounded-lg border border-[#2a2a2a] space-y-2">
+                    <div class="bg-[#111] p-3 rounded-lg border border-[#2a2a2a] space-y-2">
                         <label class="flex items-center gap-2 text-[11px] text-gray-400 cursor-pointer"><input type="checkbox" v-model="newProduct.use_box_option" class="w-3.5 h-3.5 accent-[#8B7355]">박스 추가 옵션 활성화</label>
                         <input v-if="newProduct.use_box_option" v-model.number="newProduct.box_price" type="number" placeholder="박스 추가금 (원)" class="input">
                     </div>
@@ -387,13 +398,13 @@ createApp({
         const isSaving        = ref(false);
         const uploadProgress  = ref({ main:'', detail:'', notice:'', review:'' });
 
-        const categories           = ref(['의류','가방','신발','시계','악세서리','etc']);
-        const allowedClothingSizes = ['XS','S','M','L','XL','2XL','3XL'];
+        const categories           = ref(['시계','악세서리','etc']);
+        
         const products = ref([]);
         const notices  = ref([]);
         const reviews  = ref([]);
 
-        const newProduct = ref({ brand:'', name:'', category:'의류', price:null, description:'', sizes:[], use_box_option:false, box_price:0, mainFile:null, mainPreview:'', detailFiles:[] });
+        const newProduct = ref({ brand:'', name:'', category:'시계', price:null, description:'', sizes:[], sizeInputs:['','','','','',''], use_box_option:false, box_price:0, mainFile:null, mainPreview:'', detailFiles:[] });
         const newNotice  = ref({ title:'', content:'', noticeFile:null });
         const newReview  = ref({ author:'', product_name:'', content:'', reviewFile:null });
 
@@ -499,14 +510,16 @@ createApp({
             else if(type==='review'){newReview.value.reviewFile=files[0];uploadProgress.value.review='';}
         };
 
-        const handleCategoryChange = () => {
-            if(newProduct.value.category!=='의류'){newProduct.value.sizes=['FREE'];newProduct.value.use_box_option=['시계','가방','악세서리'].includes(newProduct.value.category);if(!newProduct.value.use_box_option)newProduct.value.box_price=0;}
-            else{newProduct.value.sizes=[];newProduct.value.use_box_option=false;newProduct.value.box_price=0;}
+        const handleCategoryChange = () => {}; // 카테고리 변경 시 추가 처리 없음
+
+        const syncSizes = () => {
+            newProduct.value.sizes = newProduct.value.sizeInputs.map(s => s.trim().toUpperCase()).filter(s => s);
         };
 
         const addProduct = async () => {
             if(!newProduct.value.brand||!newProduct.value.name||!newProduct.value.price){alert('⚠️ 브랜드, 상품명, 가격은 필수입니다.');return;}
-            if(newProduct.value.category==='의류'&&newProduct.value.sizes.length===0){alert('⚠️ 의류 사이즈를 선택해 주세요.');return;}
+            syncSizes();
+            if(newProduct.value.sizes.length===0){alert('⚠️ 사이즈를 최소 1개 입력해 주세요. (단일 사이즈면 FREE 입력)');return;}
             isSaving.value=true;
             let image_url=null, detail_image_urls=[];
             if(newProduct.value.mainFile)image_url=await uploadToStorage(newProduct.value.mainFile,'products/main','main');
@@ -518,7 +531,8 @@ createApp({
             isSaving.value=false;
             if(error){alert('❌ 저장 실패: '+error.message);return;}
             alert('✅ 상품이 등록되었습니다.');
-            newProduct.value={brand:'',name:'',category:'의류',price:null,description:'',sizes:[],use_box_option:false,box_price:0,mainFile:null,mainPreview:'',detailFiles:[]};
+            newProduct.value={brand:'',name:'',category:'시계',price:null,description:'',sizes:[],sizeInputs:['','','','','',''],use_box_option:false,box_price:0,mainFile:null,mainPreview:'',detailFiles:''.split('')};
+            newProduct.value.detailFiles=[];
             uploadProgress.value={main:'',detail:'',notice:'',review:''}; await fetchProducts();
         };
 
@@ -574,10 +588,10 @@ createApp({
         return {
             isAuthenticated, adminEmail, loginForm, loginError, isLoggingIn,
             adminTab, isLoading, isSaving, uploadProgress,
-            categories, allowedClothingSizes, products, notices, reviews,
+            categories, products, notices, reviews,
             newProduct, newNotice, newReview,
             login, logout, fetchProducts, fetchNotices, fetchReviews,
-            handleFileSelect, handleCategoryChange, addProduct, deleteProduct,
+            handleFileSelect, handleCategoryChange, syncSizes, addProduct, deleteProduct,
             addNotice, deleteNotice, addReview, deleteReview,
             formatDate, formatPrice,
             users, isUsersLoading, userSearch, filteredUsers, selectedUser, newThisMonth,
