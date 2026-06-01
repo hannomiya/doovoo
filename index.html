@@ -596,6 +596,26 @@ const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFz
 const TOSS_CLIENT_KEY = 'test_ck_E92LAa5PVblAGDAvNNoz87YmpXyJ';
 const KAKAO_CHAT_URL  = 'https://open.kakao.com/o/s4wJ4sxi';
 
+// 텔레그램 봇 설정
+const TELEGRAM_BOT_TOKEN = '8710100611:AAEXZM6AO-2iKwtVFg6b1Y2Y9_pgbZCwUKg';
+const TELEGRAM_CHAT_ID   = '8995229452';
+
+const sendTelegramNotification = async (message) => {
+    try {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id:    TELEGRAM_CHAT_ID,
+                text:       message,
+                parse_mode: 'HTML',
+            })
+        });
+    } catch (e) {
+        console.warn('텔레그램 알림 전송 실패:', e);
+    }
+};
+
 const DELIVERY_STEPS = [
     { key:'preparing',  label:'상품 준비중',     short:'준비중' },
     { key:'inspecting', label:'현지 상품 검수중', short:'검수중' },
@@ -854,7 +874,29 @@ createApp({
                 if (dup){alert('❌ 이미 사용된 결제키입니다.');return;}
                 await sb.from('orders').update({payment_key:paymentKey,status:'paid',delivery_status:'preparing'}).eq('order_id',orderId);
                 const isGuest=order.order_type==='guest';
-                alert(`🎉 결제가 완료되었습니다!\n\n${isGuest?`📋 비회원 주문 조회 번호: ${order.lookup_code}\n이 번호를 꼭 메모해두세요!`:`주문번호: ${orderId}`}`);
+
+                // 텔레그램 알림 전송
+                const notifyMsg = [
+                    '🛍️ <b>새 주문이 들어왔습니다!</b>',
+                    '',
+                    `📦 상품명: <b>${order.product_name}</b>`,
+                    `📏 사이즈: ${order.size}`,
+                    `💰 결제금액: <b>${Number(order.amount).toLocaleString()}원</b>`,
+                    '',
+                    `👤 받는 분: ${order.receiver_name}`,
+                    `📞 연락처: ${order.receiver_phone}`,
+                    `🏠 주소: ${order.address} ${order.address_detail||''}`,
+                    order.customs_code ? `🛃 통관부호: ${order.customs_code}` : '',
+                    order.memo ? `📝 요청사항: ${order.memo}` : '',
+                    '',
+                    `🔖 주문번호: <code>${orderId}</code>`,
+                    isGuest ? `🔑 조회코드: <code>${order.lookup_code}</code>` : '',
+                    `👥 주문유형: ${isGuest?'비회원':'회원'}`,
+                ].filter(Boolean).join('\n');
+
+                await sendTelegramNotification(notifyMsg);
+
+                alert(\`🎉 결제가 완료되었습니다!\n\n\${isGuest?\`📋 비회원 주문 조회 번호: \${order.lookup_code}\n이 번호를 꼭 메모해두세요!\`:\`주문번호: \${orderId}\`}\`);
                 navigateTo('shop');
             } else if (payment==='fail'&&orderId) {
                 await sb.from('orders').update({status:'cancelled'}).eq('order_id',orderId);
