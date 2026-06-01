@@ -376,6 +376,26 @@ const SUPABASE_URL  = 'https://ntexeskcthjnfafogknk.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50ZXhlc2tjdGhqbmZhZm9na25rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMzExMjEsImV4cCI6MjA5NTcwNzEyMX0.qz9hqjP_-wYFUeGmbC3mh0ZPEQsPUKAAxJYUHeviauY';
 const BUCKET = 'doovoo-images';
 
+// 텔레그램 봇 설정
+const TELEGRAM_BOT_TOKEN = '8710100611:AAEXZM6AO-2iKwtVFg6b1Y2Y9_pgbZCwUKg';
+const TELEGRAM_CHAT_ID   = '8995229452';
+
+const sendTelegramNotification = async (message) => {
+    try {
+        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                chat_id:    TELEGRAM_CHAT_ID,
+                text:       message,
+                parse_mode: 'HTML',
+            })
+        });
+    } catch (e) {
+        console.warn('텔레그램 알림 전송 실패:', e);
+    }
+};
+
 const DELIVERY_STEPS = [
     { key:'preparing',  label:'상품 준비중',     short:'준비중' },
     { key:'inspecting', label:'현지 상품 검수중', short:'검수중' },
@@ -477,6 +497,16 @@ createApp({
         const kickUser = async (u) => {
             if (!confirm(`${u.name||u.email} 회원을 탈퇴 처리하시겠습니까?`)) return;
             await sb.from('profiles').delete().eq('id',u.id);
+
+            // 탈퇴 알림
+            await sendTelegramNotification([
+                '🚫 <b>회원 탈퇴 처리</b>',
+                '',
+                `👤 이름: ${u.name||'-'}`,
+                `📧 이메일: ${u.email}`,
+                `📅 가입일: ${u.created_at ? new Date(u.created_at).toLocaleDateString('ko-KR') : '-'}`,
+            ].join('\n'));
+
             alert(`✅ ${u.email} 프로필 데이터가 삭제되었습니다.\n\n※ Auth 계정 완전 삭제는 Supabase 대시보드 > Authentication > Users에서 처리하세요.`);
             selectedUser.value=null; await fetchUsers();
         };
@@ -491,6 +521,29 @@ createApp({
             const { error }=await sb.from('orders').update({ delivery_status:newStatus }).eq('id',order.id);
             if (error){ alert('업데이트 실패: '+error.message); return; }
             order.delivery_status=newStatus;
+
+            // 배송 상태 변경 텔레그램 알림
+            const stepLabel = DELIVERY_STEPS.find(s=>s.key===newStatus)?.label || newStatus;
+            const statusEmoji = {
+                preparing:  '📦',
+                inspecting: '🔍',
+                arrived:    '🏭',
+                shipping:   '🚚',
+                delivered:  '✅',
+            }[newStatus] || '📋';
+
+            const msg = [
+                `${statusEmoji} <b>배송 상태가 변경되었습니다</b>`,
+                '',
+                `📦 상품: <b>${order.product_name}</b> (${order.size})`,
+                `👤 받는 분: ${order.receiver_name}`,
+                `📞 연락처: ${order.receiver_phone}`,
+                '',
+                `🔄 상태: <b>${stepLabel}</b>`,
+                `🔖 주문번호: <code>${order.order_id}</code>`,
+            ].join('\n');
+
+            await sendTelegramNotification(msg);
         };
 
         const uploadToStorage = async (file, folder, progressKey) => {
