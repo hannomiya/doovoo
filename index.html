@@ -565,7 +565,7 @@
                     <div class="text-center space-y-1">
                         <p class="text-[10px] text-gray-400">코드를 받지 못하셨나요?</p>
                         <button @click="resendOtp" :disabled="isAuthLoading||resendCooldown>0" class="text-[11px] text-[#6D6456] font-bold hover:underline disabled:text-gray-400 disabled:no-underline">
-                            {{ resendCooldown>0?`재발송 (${resendCooldown}초 후)` : '인증 코드 재발송' }}
+                            {{ resendCooldown>0 ? '재발송 (' + resendCooldown + '초 후)' : '인증 코드 재발송' }}
                         </button>
                     </div>
                 </div>
@@ -602,7 +602,7 @@ const TELEGRAM_CHAT_ID   = '8995229452';
 
 const sendTelegramNotification = async (message) => {
     try {
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        await fetch('https://api.telegram.org/bot'+TELEGRAM_BOT_TOKEN+'/sendMessage', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({
@@ -645,10 +645,10 @@ function generateGuestCode() {
 }
 
 const TERMS_CONTENT = {
-    service:    { title:'[필수] 이용약관', content:`<p><strong>제1조</strong> 이 약관은 Doovoo Street Market이 제공하는 서비스의 이용 조건을 규정합니다.</p><p><strong>제2조</strong> 회사는 상품 판매, 배송, 고객 지원 등의 서비스를 제공합니다.</p><p><strong>제3조</strong> 이용자는 언제든지 탈퇴를 요청할 수 있습니다.</p>` },
-    privacy:    { title:'[필수] 개인정보 수집 및 이용 동의', content:`<p><strong>수집 항목</strong> 이름, 이메일, 전화번호, 주소, 통관부호</p><p><strong>수집 목적</strong> 회원 식별, 주문·배송 처리, 통관 신고</p><p><strong>보유 기간</strong> 탈퇴 시까지 (전자상거래 기록: 5년)</p>` },
-    thirdparty: { title:'[필수] 개인정보 제3자 제공 동의', content:`<p><strong>제공 받는 자</strong> 배송 업체, 관세청</p><p><strong>제공 항목</strong> 수취인 정보, 주소, 통관부호</p><p><strong>보유 기간</strong> 배송 완료 후 1년</p>` },
-    marketing:  { title:'[선택] 마케팅 정보 수신 동의', content:`<p>신상품 안내, 할인 혜택 등을 이메일/SMS로 발송합니다. 언제든 철회 가능합니다.</p>` }
+    service:    { title:'[필수] 이용약관', content:'<p><strong>제1조</strong> 이 약관은 Doovoo Street Market이 제공하는 서비스의 이용 조건을 규정합니다.</p><p><strong>제2조</strong> 회사는 상품 판매, 배송, 고객 지원 등의 서비스를 제공합니다.</p><p><strong>제3조</strong> 이용자는 언제든지 탈퇴를 요청할 수 있습니다.</p>' },
+    privacy:    { title:'[필수] 개인정보 수집 및 이용 동의', content:'<p><strong>수집 항목</strong> 이름, 이메일, 전화번호, 주소, 통관부호</p><p><strong>수집 목적</strong> 회원 식별, 주문·배송 처리, 통관 신고</p><p><strong>보유 기간</strong> 탈퇴 시까지 (전자상거래 기록: 5년)</p>' },
+    thirdparty: { title:'[필수] 개인정보 제3자 제공 동의', content:'<p><strong>제공 받는 자</strong> 배송 업체, 관세청</p><p><strong>제공 항목</strong> 수취인 정보, 주소, 통관부호</p><p><strong>보유 기간</strong> 배송 완료 후 1년</p>' },
+    marketing:  { title:'[선택] 마케팅 정보 수신 동의', content:'<p>신상품 안내, 할인 혜택 등을 이메일/SMS로 발송합니다. 언제든 철회 가능합니다.</p>' }
 };
 
 createApp({
@@ -857,7 +857,7 @@ createApp({
             try {
                 await loadTossSDK();
                 const toss=window.TossPayments(TOSS_CLIENT_KEY);
-                await toss.requestPayment('카드',{amount:calculatedTotalPrice.value,orderId:currentOrderId.value,orderName:activeProduct.value.name+(orderOptions.value.size?` (${orderOptions.value.size})`:''),customerName:shippingForm.value.name,successUrl:window.location.origin+window.location.pathname+'?payment=success&orderId='+currentOrderId.value+'&amount='+calculatedTotalPrice.value,failUrl:window.location.origin+window.location.pathname+'?payment=fail&orderId='+currentOrderId.value});
+                await toss.requestPayment('카드',{amount:calculatedTotalPrice.value,orderId:currentOrderId.value,orderName:activeProduct.value.name+(orderOptions.value.size?' ('+orderOptions.value.size+')':''),customerName:shippingForm.value.name,successUrl:window.location.origin+window.location.pathname+'?payment=success&orderId='+currentOrderId.value+'&amount='+calculatedTotalPrice.value,failUrl:window.location.origin+window.location.pathname+'?payment=fail&orderId='+currentOrderId.value});
             } catch(e){ if(e.code!=='USER_CANCEL')alert('결제 오류: '+e.message); }
             isCheckoutLoading.value=false;
         };
@@ -879,19 +879,19 @@ createApp({
                 const notifyMsg = [
                     '🛍️ <b>새 주문이 들어왔습니다!</b>',
                     '',
-                    `📦 상품명: <b>${order.product_name}</b>`,
-                    `📏 사이즈: ${order.size}`,
-                    `💰 결제금액: <b>${Number(order.amount).toLocaleString()}원</b>`,
+                    '📦 상품명: <b>' + order.product_name + '</b>',
+                    '📏 사이즈: ' + order.size,
+                    '💰 결제금액: <b>' + Number(order.amount).toLocaleString() + '원</b>',
                     '',
-                    `👤 받는 분: ${order.receiver_name}`,
-                    `📞 연락처: ${order.receiver_phone}`,
-                    `🏠 주소: ${order.address} ${order.address_detail||''}`,
-                    order.customs_code ? `🛃 통관부호: ${order.customs_code}` : '',
-                    order.memo ? `📝 요청사항: ${order.memo}` : '',
+                    '👤 받는 분: ' + order.receiver_name,
+                    '📞 연락처: ' + order.receiver_phone,
+                    '🏠 주소: ' + order.address + ' ' + (order.address_detail||''),
+                    order.customs_code ? '🛃 통관부호: ' + order.customs_code : '',
+                    order.memo ? '📝 요청사항: ' + order.memo : '',
                     '',
-                    `🔖 주문번호: <code>${orderId}</code>`,
-                    isGuest ? `🔑 조회코드: <code>${order.lookup_code}</code>` : '',
-                    `👥 주문유형: ${isGuest?'비회원':'회원'}`,
+                    '🔖 주문번호: <code>' + orderId + '</code>',
+                    isGuest ? '🔑 조회코드: <code>' + order.lookup_code + '</code>' : '',
+                    '👥 주문유형: ' + (isGuest?'비회원':'회원'),
                 ].filter(Boolean).join('\n');
 
                 await sendTelegramNotification(notifyMsg);
@@ -911,14 +911,14 @@ createApp({
         const lookupOrder = async () => {
             if (!lookupCode.value.trim()){lookupError.value='조회 번호를 입력해 주세요.';return;}
             lookupError.value='';lookupResult.value=null;isLookupLoading.value=true;
-            const{data,error}=await sb.from('orders').select('*').or(`lookup_code.eq.${lookupCode.value.trim()},order_id.eq.${lookupCode.value.trim()}`).order('created_at',{ascending:false}).limit(1).maybeSingle();
+            const{data,error}=await sb.from('orders').select('*').or('lookup_code.eq.'+lookupCode.value.trim()+',order_id.eq.'+lookupCode.value.trim()).order('created_at',{ascending:false}).limit(1).maybeSingle();
             isLookupLoading.value=false;
             if (error||!data){lookupError.value='해당 주문을 찾을 수 없습니다.';return;}
             lookupResult.value=data;
         };
 
         const openShippingPostcode = () => { new daum.Postcode({oncomplete(data){shippingForm.value.postcode=data.zonecode;shippingForm.value.address=data.roadAddress||data.jibunAddress;}}).open(); };
-        const formatShippingPhone = () => { let v=shippingForm.value.phone.replace(/\D/g,''); if(v.length<=3)shippingForm.value.phone=v; else if(v.length<=7)shippingForm.value.phone=`${v.slice(0,3)}-${v.slice(3)}`; else shippingForm.value.phone=`${v.slice(0,3)}-${v.slice(3,7)}-${v.slice(7,11)}`; };
+        const formatShippingPhone = () => { let v=shippingForm.value.phone.replace(/\D/g,''); if(v.length<=3)shippingForm.value.phone=v; else if(v.length<=7)shippingForm.value.phone=v.slice(0,3)+'-'+v.slice(3); else shippingForm.value.phone=v.slice(0,3)+'-'+v.slice(3,7)+'-'+v.slice(7,11); };
 
         // Auth
         const openAuthModal = (tab='login') => { authTab.value=tab; authError.value=''; authSuccess.value=''; authForm.value={email:'',password:'',passwordConfirm:''}; showAuthModal.value=true; };
@@ -1070,7 +1070,7 @@ createApp({
 
         const handleLogout = async () => { await sb.auth.signOut(); showSidePanel.value=false; myOrders.value=[]; };
 
-        const formatPhone = () => { let v=profileForm.value.phone.replace(/\D/g,''); if(v.length<=3)profileForm.value.phone=v; else if(v.length<=7)profileForm.value.phone=`${v.slice(0,3)}-${v.slice(3)}`; else profileForm.value.phone=`${v.slice(0,3)}-${v.slice(3,7)}-${v.slice(7,11)}`; };
+        const formatPhone = () => { let v=profileForm.value.phone.replace(/\D/g,''); if(v.length<=3)profileForm.value.phone=v; else if(v.length<=7)profileForm.value.phone=v.slice(0,3)+'-'+v.slice(3); else profileForm.value.phone=v.slice(0,3)+'-'+v.slice(3,7)+'-'+v.slice(7,11); };
         const openPostcode = () => { new daum.Postcode({oncomplete(data){profileForm.value.postcode=data.zonecode;profileForm.value.address=data.roadAddress||data.jibunAddress;}}).open(); };
 
         const triggerSearch  = () => { if(currentTab.value!=='shop')navigateTo('shop'); };
