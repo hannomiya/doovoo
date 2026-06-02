@@ -417,7 +417,7 @@
                 <div class="grid grid-cols-2 gap-3">
                     <div class="bg-[#111] p-3 rounded-xl border border-[#222]"><p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">이름</p><p class="text-gray-300 font-bold">{{ selectedUser.name||'-' }}</p></div>
                     <div class="bg-[#111] p-3 rounded-xl border border-[#222]"><p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">전화번호</p><p class="text-gray-300 font-bold">{{ selectedUser.phone||'-' }}</p></div>
-                    <div class="bg-[#111] p-3 rounded-xl border border-[#222] col-span-2"><p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">주소</p><p class="text-gray-300 font-bold leading-relaxed">{{ selectedUser.postcode?`[${selectedUser.postcode}] `:'' }}{{ selectedUser.address||'-' }} {{ selectedUser.address_detail||'' }}</p></div>
+                    <div class="bg-[#111] p-3 rounded-xl border border-[#222] col-span-2"><p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">주소</p><p class="text-gray-300 font-bold leading-relaxed">{{ selectedUser.postcode ? '[' + selectedUser.postcode + '] ' : '' }}{{ selectedUser.address||'-' }} {{ selectedUser.address_detail||'' }}</p></div>
                     <div class="bg-[#111] p-3 rounded-xl border border-[#222]"><p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">통관부호</p><p class="text-gray-300 font-mono font-bold">{{ selectedUser.customs_code||'-' }}</p></div>
                     <div class="bg-[#111] p-3 rounded-xl border border-[#222]"><p class="text-[10px] text-gray-600 font-bold tracking-wider mb-1">가입일</p><p class="text-gray-300">{{ formatDate(selectedUser.created_at) }}</p></div>
                 </div>
@@ -449,7 +449,7 @@ const TELEGRAM_CHAT_ID   = '8995229452';
 
 const sendTelegramNotification = async (message) => {
     try {
-        await fetch(`https://api.telegram.org/bot${TELEGRAM_BOT_TOKEN}/sendMessage`, {
+        await fetch('https://api.telegram.org/bot'+TELEGRAM_BOT_TOKEN+'/sendMessage', {
             method:'POST', headers:{'Content-Type':'application/json'},
             body: JSON.stringify({ chat_id:TELEGRAM_CHAT_ID, text:message, parse_mode:'HTML' })
         });
@@ -655,7 +655,7 @@ createApp({
                 editUploadProgress.value.main='업로드 중...';
                 const file=files[0];
                 const ext=file.name.split('.').pop();
-                const path=`products/main/${Date.now()}_edit.${ext}`;
+                const path='products/main/'+Date.now()+'_edit.'+ext;
                 const { error }=await sb.storage.from(BUCKET).upload(path,file,{cacheControl:'3600',upsert:false});
                 if (error) { editUploadProgress.value.main='❌ '+error.message; return; }
                 editForm.value.image_url=sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl;
@@ -665,10 +665,10 @@ createApp({
                 editUploadProgress.value.detail='업로드 중...';
                 for (let i=0;i<files.length;i++) {
                     const file=files[i], ext=file.name.split('.').pop();
-                    const path=`products/detail/${Date.now()}_edit_${i}.${ext}`;
+                    const path='products/detail/'+Date.now()+'_edit_'+i+'.'+ext;
                     const { error }=await sb.storage.from(BUCKET).upload(path,file,{cacheControl:'3600',upsert:false});
                     if (!error) editForm.value.detail_image_urls.push(sb.storage.from(BUCKET).getPublicUrl(path).data.publicUrl);
-                    editUploadProgress.value.detail=`${i+1}/${files.length} 완료`;
+                    editUploadProgress.value.detail=(i+1)+'/'+files.length+' 완료';
                 }
             }
         };
@@ -718,13 +718,13 @@ createApp({
             XLSX.utils.book_append_sheet(wb, ws, '주문목록');
             // 컬럼 너비 자동
             ws['!cols'] = Object.keys(data[0]||{}).map(k => ({ wch: Math.max(k.length, 12) }));
-            const fileName = `doovoo_orders_${new Date().toISOString().slice(0,10)}.xlsx`;
+            const fileName = 'doovoo_orders_'+new Date().toISOString().slice(0,10)+'.xlsx';
             XLSX.writeFile(wb, fileName);
         };
 
         // ── CRUD ───────────────────────────────────────────────
         const uploadToStorage = async (file, folder, progressKey) => {
-            const ext=file.name.split('.').pop(), path=`${folder}/${Date.now()}_${Math.random().toString(36).slice(2)}.${ext}`;
+            const ext=file.name.split('.').pop(), path=folder+'/'+Date.now()+'_'+Math.random().toString(36).slice(2)+'.'+ext;
             uploadProgress.value[progressKey]='업로드 중...';
             const { error }=await sb.storage.from(BUCKET).upload(path,file,{cacheControl:'3600',upsert:false});
             if (error) { uploadProgress.value[progressKey]='❌ '+error.message; return null; }
@@ -748,8 +748,8 @@ createApp({
             let image_url=null, detail_image_urls=[];
             if(newProduct.value.mainFile) image_url=await uploadToStorage(newProduct.value.mainFile,'products/main','main');
             if(newProduct.value.detailFiles.length>0){
-                uploadProgress.value.detail=`0/${newProduct.value.detailFiles.length} 업로드 중...`;
-                for(let i=0;i<newProduct.value.detailFiles.length;i++){const url=await uploadToStorage(newProduct.value.detailFiles[i],'products/detail','detail');if(url)detail_image_urls.push(url);uploadProgress.value.detail=`${i+1}/${newProduct.value.detailFiles.length} 완료`;}
+                uploadProgress.value.detail='0/'+newProduct.value.detailFiles.length+' 업로드 중...';
+                for(let i=0;i<newProduct.value.detailFiles.length;i++){const url=await uploadToStorage(newProduct.value.detailFiles[i],'products/detail','detail');if(url)detail_image_urls.push(url);uploadProgress.value.detail=(i+1)+'/'+newProduct.value.detailFiles.length+' 완료';}
             }
             // sort_order: 현재 최대값 + 1
             const maxOrder = products.value.reduce((m,p)=>Math.max(m,p.sort_order??0),0);
@@ -764,8 +764,8 @@ createApp({
         const deleteProduct = async (id, imageUrl, detailUrls) => {
             if(!confirm('이 상품을 삭제할까요?'))return;
             const paths=[];
-            if(imageUrl)paths.push(imageUrl.split(`${BUCKET}/`)[1]);
-            if(detailUrls?.length>0)detailUrls.forEach(u=>{if(u)paths.push(u.split(`${BUCKET}/`)[1]);});
+            if(imageUrl)paths.push(imageUrl.split(BUCKET+'/')[1]);
+            if(detailUrls?.length>0)detailUrls.forEach(u=>{if(u)paths.push(u.split(BUCKET+'/')[1]);});
             if(paths.length>0)await sb.storage.from(BUCKET).remove(paths.filter(Boolean));
             const{error}=await sb.from('products').delete().eq('id',id);
             if(error){alert('❌ 삭제 실패: '+error.message);return;}
@@ -785,7 +785,7 @@ createApp({
         };
         const deleteNotice = async (id, imageUrl) => {
             if(!confirm('이 공지사항을 삭제할까요?'))return;
-            if(imageUrl)await sb.storage.from(BUCKET).remove([imageUrl.split(`${BUCKET}/`)[1]].filter(Boolean));
+            if(imageUrl)await sb.storage.from(BUCKET).remove([imageUrl.split(BUCKET+'/')[1]].filter(Boolean));
             const{error}=await sb.from('notices').delete().eq('id',id);
             if(error){alert('❌ 삭제 실패: '+error.message);return;}
             notices.value=notices.value.filter(n=>n.id!==id);
@@ -804,7 +804,7 @@ createApp({
         };
         const deleteReview = async (id, imageUrl) => {
             if(!confirm('이 리뷰를 삭제할까요?'))return;
-            if(imageUrl)await sb.storage.from(BUCKET).remove([imageUrl.split(`${BUCKET}/`)[1]].filter(Boolean));
+            if(imageUrl)await sb.storage.from(BUCKET).remove([imageUrl.split(BUCKET+'/')[1]].filter(Boolean));
             const{error}=await sb.from('reviews').delete().eq('id',id);
             if(error){alert('❌ 삭제 실패: '+error.message);return;}
             reviews.value=reviews.value.filter(r=>r.id!==id);
@@ -812,15 +812,15 @@ createApp({
 
         const openUserDetail = (u) => { selectedUser.value=u; };
         const kickUser = async (u) => {
-            if (!confirm(`${u.name||u.email} 회원을 탈퇴 처리하시겠습니까?`)) return;
+            if (!confirm((u.name||u.email)+' 회원을 탈퇴 처리하시겠습니까?')) return;
             await sb.from('profiles').delete().eq('id',u.id);
             await sendTelegramNotification([
                 '🚫 <b>회원 탈퇴 처리</b>', '',
-                `👤 이름: ${u.name||'-'}`,
-                `📧 이메일: ${u.email}`,
-                `📅 가입일: ${u.created_at?new Date(u.created_at).toLocaleDateString('ko-KR'):'-'}`,
+                '👤 이름: '+(u.name||'-'),
+                '📧 이메일: '+u.email,
+                '📅 가입일: '+(u.created_at?new Date(u.created_at).toLocaleDateString('ko-KR'):'-'),
             ].join('\n'));
-            alert(`✅ ${u.email} 프로필 데이터가 삭제되었습니다.\n\n※ Auth 계정 완전 삭제는 Supabase 대시보드 > Authentication > Users에서 처리하세요.`);
+            alert('✅ '+u.email+' 프로필 데이터가 삭제되었습니다.\n\n※ Auth 계정 완전 삭제는 Supabase 대시보드 > Authentication > Users에서 처리하세요.');
             selectedUser.value=null; await fetchUsers();
         };
 
