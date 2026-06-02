@@ -896,7 +896,10 @@ createApp({
 
                 await sendTelegramNotification(notifyMsg);
 
-                alert(\`🎉 결제가 완료되었습니다!\n\n\${isGuest?\`📋 비회원 주문 조회 번호: \${order.lookup_code}\n이 번호를 꼭 메모해두세요!\`:\`주문번호: \${orderId}\`}\`);
+                const alertMsg = isGuest
+                    ? '🎉 결제가 완료되었습니다!\n\n📋 비회원 주문 조회 번호: ' + order.lookup_code + '\n이 번호를 꼭 메모해두세요!'
+                    : '🎉 결제가 완료되었습니다!\n\n주문번호: ' + orderId;
+                alert(alertMsg);
                 navigateTo('shop');
             } else if (payment==='fail'&&orderId) {
                 await sb.from('orders').update({status:'cancelled'}).eq('order_id',orderId);
