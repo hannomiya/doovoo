@@ -824,4 +824,47 @@ createApp({
             selectedUser.value=null; await fetchUsers();
         };
 
-        const updateDeliveryStatus = async
+
+
+        const updateDeliveryStatus = async (order, newStatus) => {
+            const { error }=await sb.from('orders').update({ delivery_status:newStatus }).eq('id',order.id);
+            if (error) { alert('업데이트 실패: '+error.message); return; }
+            order.delivery_status = newStatus;
+            const stepLabel = DELIVERY_STEPS.find(s=>s.key===newStatus)?.label || newStatus;
+            const emoji = { preparing:'📦', inspecting:'🔍', arrived:'🏭', shipping:'🚚', delivered:'✅' }[newStatus] || '📋';
+            await sendTelegramNotification([
+                emoji+' <b>배송 상태가 변경되었습니다</b>', '',
+                '📦 상품: <b>'+order.product_name+'</b> ('+order.size+')',
+                '👤 받는 분: '+order.receiver_name,
+                '📞 연락처: '+order.receiver_phone, '',
+                '🔄 상태: <b>'+stepLabel+'</b>',
+                '🔖 주문번호: <code>'+order.order_id+'</code>',
+            ].join('\n'));
+        };
+
+        return {
+            isAuthenticated, adminEmail, loginForm, loginError, isLoggingIn,
+            adminTab, isLoading, isSaving, uploadProgress,
+            categories, products, notices, reviews,
+            newProduct, newNotice, newReview,
+            login, logout, fetchProducts, fetchNotices, fetchReviews,
+            handleFileSelect, syncSizes, addProduct, deleteProduct,
+            addNotice, deleteNotice, addReview, deleteReview,
+            formatDate, formatPrice,
+            draggingId, dragOverId, orderChanged,
+            onDragStart, onDragOver, onDragEnd, onDrop, saveProductOrder,
+            togglePin,
+            editingProduct, editForm, editError, editUploadProgress,
+            openEditModal, handleEditFileSelect, syncEditSizes, saveProductEdit,
+            users, isUsersLoading, userSearch, filteredUsers, selectedUser, newThisMonth,
+            fetchUsers, openUserDetail, kickUser,
+            orders, isOrdersLoading, orderSearch, orderStatusFilter, filteredOrders,
+            deliverySteps, deliveryLabel, stepBadgeClass, orderCountByStatus,
+            fetchOrders, updateDeliveryStatus,
+            downloadExcel,
+        };
+    }
+}).mount('#app');
+</script>
+</body>
+</html>
