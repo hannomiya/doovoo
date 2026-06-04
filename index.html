@@ -148,6 +148,32 @@
                     </div>
                 </div>
             </div>
+            <!-- 리뷰 작성 (배송완료 주문) -->
+            <div v-if="deliveredOrders.length > 0" class="bg-[#FAF7F0] rounded-2xl border border-[#EAE5D9] overflow-hidden">
+                <div class="px-4 py-3 border-b border-[#EAE5D9]"><p class="text-[10px] font-black text-[#6D6456] tracking-wider uppercase">리뷰 작성</p></div>
+                <div class="divide-y divide-[#F0ECE1]">
+                    <div v-for="order in deliveredOrders" :key="order.id" class="p-3 space-y-2">
+                        <p class="text-xs font-bold text-gray-700">{{ order.product_name }}</p>
+                        <div v-if="!reviewingOrderId || reviewingOrderId !== order.id">
+                            <button @click="startReview(order)"
+                                    class="w-full py-1.5 text-[11px] font-bold text-[#6D6456] border border-[#6D6456]/30 rounded-lg hover:bg-[#6D6456]/5 transition">
+                                ✍️ 리뷰 작성하기
+                            </button>
+                        </div>
+                        <div v-else class="space-y-2">
+                            <textarea v-model="reviewText" placeholder="구매 후기를 남겨주세요..." rows="3"
+                                      class="w-full text-xs p-2 border border-[#E8E4DC] rounded-lg bg-white focus:outline-none focus:border-[#6D6456] resize-none"></textarea>
+                            <div class="flex gap-2">
+                                <button @click="submitReview(order)" :disabled="isReviewSubmitting" class="flex-1 py-1.5 text-[11px] font-bold text-white bg-[#6D6456] rounded-lg hover:bg-[#4A463F] transition">
+                                    {{ isReviewSubmitting ? '등록 중...' : '등록' }}
+                                </button>
+                                <button @click="reviewingOrderId=null; reviewText=''" class="flex-1 py-1.5 text-[11px] font-bold text-gray-500 border border-[#E8E4DC] rounded-lg hover:bg-gray-50 transition">취소</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
             <button @click="handleLogout" class="w-full py-2.5 rounded-xl border border-red-100 text-xs font-bold text-red-400 hover:bg-red-50 transition-colors mt-2">로그아웃</button>
         </div>
     </div>
@@ -189,6 +215,41 @@
         </div>
     </header>
 
+    <!-- ══ 히어로 배너 (헤더 바로 아래, 항상 표시) ══ -->
+    <div v-if="heroBanners.length > 0" class="hero-banner"
+         @mouseenter="stopHeroTimer" @mouseleave="startHeroTimer">
+        <div v-for="(banner, idx) in heroBanners" :key="banner.id"
+             :class="['hero-slide', idx===heroCurrent?'active':'']">
+            <img :src="banner.image_url" :alt="banner.title">
+            <div class="hero-overlay"></div>
+        </div>
+        <div class="hero-content">
+            <div class="hero-dots">
+                <div v-for="(b, idx) in heroBanners" :key="b.id"
+                     :class="['hero-dot', idx===heroCurrent?'active':'']"
+                     @click="heroGoTo(idx)"></div>
+            </div>
+            <div v-if="heroBanners[heroCurrent]"
+                 @click="heroBanners[heroCurrent] && heroBanners[heroCurrent].product_id ? goToDetailById(heroBanners[heroCurrent].product_id) : null"
+                 :class="heroBanners[heroCurrent] && heroBanners[heroCurrent].product_id ? 'cursor-pointer' : ''">
+                <p v-if="heroBanners[heroCurrent] && heroBanners[heroCurrent].subtitle" class="text-[11px] font-black tracking-[0.25em] text-white/60 uppercase mb-2">
+                    {{ banners[heroCurrent].subtitle }}
+                </p>
+                <h2 class="text-2xl sm:text-3xl font-black text-white mb-3 leading-tight">
+                    {{ heroBanners[heroCurrent] ? heroBanners[heroCurrent].title : '' }}
+                </h2>
+                <div v-if="heroBanners[heroCurrent] && heroBanners[heroCurrent].product_id" class="flex items-center gap-4">
+                    <span class="text-xs font-bold text-white/70 border border-white/30 px-3 py-1.5 rounded-full hover:bg-white/10 transition">
+                        자세히 보기 ➔
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div v-if="heroBanners.length>1" class="hero-arrow left" @click="heroPrev">‹</div>
+        <div v-if="heroBanners.length>1" class="hero-arrow right" @click="heroNext">›</div>
+        <div class="hero-progress" :style="'width:'+(((heroCurrent+1)/Math.max(heroBanners.length,1))*100)+'%'"></div>
+    </div>
+
     <main class="flex-grow max-w-7xl mx-auto px-4 py-8 w-full">
 
         <!-- 로딩 -->
@@ -198,44 +259,6 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
             </svg>
             데이터를 불러오는 중입니다...
-        </div>
-
-        <!-- 히어로 배너 -->
-        <div v-if="currentTab==='shop'&&!isLoading&&heroProducts.length>0" class="hero-banner -mx-4 mb-10"
-             @mouseenter="stopHeroTimer" @mouseleave="startHeroTimer">
-            <!-- 슬라이드 -->
-            <div v-for="(product, idx) in heroProducts" :key="product.id"
-                 :class="['hero-slide', idx===heroCurrent?'active':'']">
-                <img :src="product.image_url" :alt="product.name">
-                <div class="hero-overlay"></div>
-            </div>
-            <!-- 컨텐츠 -->
-            <div class="hero-content">
-                <div class="hero-dots">
-                    <div v-for="(p, idx) in heroProducts" :key="p.id"
-                         :class="['hero-dot', idx===heroCurrent?'active':'']"
-                         @click="heroGoTo(idx)"></div>
-                </div>
-                <div v-if="heroProducts[heroCurrent]" @click="goToDetailView(heroProducts[heroCurrent])" class="cursor-pointer">
-                    <p class="text-[11px] font-black tracking-[0.25em] text-white/60 uppercase mb-2">
-                        {{ heroProducts[heroCurrent].brand }} · {{ heroProducts[heroCurrent].category }}
-                    </p>
-                    <h2 class="text-2xl sm:text-3xl font-black text-white mb-3 leading-tight">
-                        {{ heroProducts[heroCurrent].name }}
-                    </h2>
-                    <div class="flex items-center gap-4">
-                        <span class="text-lg font-black text-white/90">{{ formatPrice(heroProducts[heroCurrent].price) }}원</span>
-                        <span class="text-xs font-bold text-white/70 border border-white/30 px-3 py-1.5 rounded-full hover:bg-white/10 transition">
-                            자세히 보기 ➔
-                        </span>
-                    </div>
-                </div>
-            </div>
-            <!-- 화살표 -->
-            <div v-if="heroProducts.length>1" class="hero-arrow left" @click="heroPrev">‹</div>
-            <div v-if="heroProducts.length>1" class="hero-arrow right" @click="heroNext">›</div>
-            <!-- 프로그레스 바 -->
-            <div class="hero-progress" :style="'width:'+(((heroCurrent+1)/heroProducts.length)*100)+'%'"></div>
         </div>
 
         <!-- SHOP -->
@@ -248,16 +271,21 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
                 <div v-for="product in filteredProducts" :key="product.id" class="bg-white p-4 rounded-xl border border-[#F0ECE1] flex flex-col justify-between shadow-xs cursor-pointer hover:translate-y-[-2px] transition-all group relative">
                     <button @click.stop="toggleWishlist(product)" class="absolute top-3 right-3 z-10 text-lg leading-none transition-transform hover:scale-125" :class="isWishlisted(product.id)?'text-red-500':'text-gray-300'">{{ isWishlisted(product.id)?'♥':'♡' }}</button>
-                    <div @click="goToDetailView(product)">
-                        <div class="w-full h-64 bg-[#FAF7F0] rounded-lg mb-3 flex items-center justify-center text-xs text-gray-400 overflow-hidden">
-                            <img v-if="product.image_url" :src="product.image_url" class="w-full h-full object-cover">
+                    <div @click="!product.sold_out && goToDetailView(product)">
+                        <div class="w-full h-64 bg-[#FAF7F0] rounded-lg mb-3 flex items-center justify-center text-xs text-gray-400 overflow-hidden relative">
+                            <img v-if="product.image_url" :src="product.image_url" class="w-full h-full object-cover" :class="product.sold_out ? 'opacity-40' : ''">
                             <span v-else>[ {{ product.category }} 사진 ]</span>
+                            <!-- 품절 오버레이 -->
+                            <div v-if="product.sold_out" class="absolute inset-0 flex items-center justify-center">
+                                <span class="bg-black/70 text-white text-xs font-black px-4 py-2 rounded-full tracking-widest">SOLD OUT</span>
+                            </div>
                         </div>
                         <span class="text-[10px] uppercase tracking-wider text-amber-800 bg-amber-50 px-2 py-0.5 rounded font-bold">{{ product.brand }}</span>
-                        <h3 class="text-sm font-bold mt-1 text-gray-800 group-hover:text-[#6D6456] transition-colors">{{ product.name }}</h3>
+                        <h3 class="text-sm font-bold mt-1 text-gray-800 group-hover:text-[#6D6456] transition-colors" :class="product.sold_out ? 'line-through text-gray-400' : ''">{{ product.name }}</h3>
                         <div class="mt-4 pt-3 border-t border-[#FAF7F0] flex justify-between items-center">
-                            <span class="font-bold text-sm text-[#6D6456]">{{ formatPrice(product.price) }}원</span>
-                            <span class="text-[11px] text-gray-400 group-hover:text-black font-medium">자세히 보기 ➔</span>
+                            <span class="font-bold text-sm" :class="product.sold_out ? 'text-gray-400' : 'text-[#6D6456]'">{{ formatPrice(product.price) }}원</span>
+                            <span v-if="!product.sold_out" class="text-[11px] text-gray-400 group-hover:text-black font-medium">자세히 보기 ➔</span>
+                            <span v-else class="text-[11px] text-gray-400 font-medium">품절</span>
                         </div>
                     </div>
                 </div>
@@ -321,7 +349,8 @@
                                 <span class="text-xs font-bold text-gray-500">선택 옵션 합산 금액</span>
                                 <span class="text-xl font-black text-[#6D6456]">{{ formatPrice(calculatedTotalPrice) }}원</span>
                             </div>
-                            <button @click="startCheckout" class="w-full py-4 bg-[#6D6456] hover:bg-black text-white text-xs font-bold rounded-xl tracking-widest shadow-md transition">💳 즉시 주문 및 결제하기</button>
+                            <button v-if="!activeProduct.sold_out" @click="startCheckout" class="w-full py-4 bg-[#6D6456] hover:bg-black text-white text-xs font-bold rounded-xl tracking-widest shadow-md transition">💳 즉시 주문 및 결제하기</button>
+                            <button v-else class="w-full py-4 bg-gray-200 text-gray-400 text-xs font-bold rounded-xl tracking-widest cursor-not-allowed" disabled>SOLD OUT — 현재 품절된 상품입니다</button>
                         </div>
                     </div>
                 </div>
@@ -504,6 +533,7 @@
             <span @click="openKakaoChat" class="cursor-pointer hover:text-yellow-600 text-[#6D6456] font-bold transition">💬 카카오톡으로 문의하기</span>
         </div>
         <p class="pt-1 text-[10px]">© 2026 Doovoo street market. All Rights Reserved.</p>
+        <a href="privacy.html" class="text-[10px] text-gray-400 hover:text-[#6D6456] transition underline mt-0.5 inline-block">개인정보처리방침</a>
     </footer>
 
     <!-- ── Auth Modal ── -->
@@ -646,7 +676,7 @@ const { createClient } = supabase;
 
 const SUPABASE_URL  = 'https://ntexeskcthjnfafogknk.supabase.co';
 const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50ZXhlc2tjdGhqbmZhZm9na25rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMzExMjEsImV4cCI6MjA5NTcwNzEyMX0.qz9hqjP_-wYFUeGmbC3mh0ZPEQsPUKAAxJYUHeviauY';
-const TOSS_CLIENT_KEY = 'test_ck_E92LAa5PVblAGDAvNNoz87YmpXyJ';
+const TOSS_CLIENT_KEY = 'test_ck_E92LAa5PVblAGDAvNNoz87YmpXyJ'; // ★ 실서비스 전 live_ck_... 로 교체하세요
 const KAKAO_CHAT_URL  = 'https://open.kakao.com/o/s4wJ4sxi';
 
 // 텔레그램 봇 설정
@@ -698,7 +728,7 @@ function generateGuestCode() {
 }
 
 const TERMS_CONTENT = {
-    service:    { title:'[필수] 이용약관', content:'<p><strong>제1조</strong> 이 약관은 Doovoo Street Market이 제공하는 서비스의 이용 조건을 규정합니다.</p><p><strong>제2조</strong> 회사는 상품 판매, 배송, 고객 지원 등의 서비스를 제공합니다.</p><p><strong>제3조</strong> 이용자는 언제든지 탈퇴를 요청할 수 있습니다.</p>' },
+    service:    { title:'[필수] 이용약관', content:'<p><strong>제1조</strong> 이 약관은 Doovoo Street Market이 제공하는 서비스의 이용 조건을 규정합니다.</p><p><strong>제2조</strong> 회사는 상품 판매, 배송, 고객 지원 등의 서비스를 제공합니다.</p><p><strong>제3조</strong> 이용자는 언제든지 탈퇴를 요청할 수 있습니다.</p><p><a href="privacy.html" target="_blank" style="color:#6D6456;text-decoration:underline;">개인정보처리방침 전문 보기 →</a></p>' },
     privacy:    { title:'[필수] 개인정보 수집 및 이용 동의', content:'<p><strong>수집 항목</strong> 이름, 이메일, 전화번호, 주소, 통관부호</p><p><strong>수집 목적</strong> 회원 식별, 주문·배송 처리, 통관 신고</p><p><strong>보유 기간</strong> 탈퇴 시까지 (전자상거래 기록: 5년)</p>' },
     thirdparty: { title:'[필수] 개인정보 제3자 제공 동의', content:'<p><strong>제공 받는 자</strong> 배송 업체, 관세청</p><p><strong>제공 항목</strong> 수취인 정보, 주소, 통관부호</p><p><strong>보유 기간</strong> 배송 완료 후 1년</p>' },
     marketing:  { title:'[선택] 마케팅 정보 수신 동의', content:'<p>신상품 안내, 할인 혜택 등을 이메일/SMS로 발송합니다. 언제든 철회 가능합니다.</p>' }
@@ -719,22 +749,60 @@ createApp({
         const heroCurrent  = ref(0);
         const heroTimer    = ref(null);
         const HERO_DURATION = 10000;
+        const banners      = ref([]);
 
-        const heroProducts = computed(() => products.value.filter(p => p.image_url).slice(0, 6));
+        // banners DB 있으면 DB 배너, 없으면 상품 이미지로 fallback
+        const heroBanners = computed(() => {
+            if (banners.value.length > 0) return banners.value;
+            return products.value
+                .filter(p => p.image_url)
+                .slice(0, 6)
+                .map(p => ({
+                    id:         p.id,
+                    image_url:  p.image_url,
+                    title:      p.name,
+                    subtitle:   p.brand,
+                    product_id: p.id,
+                }));
+        });
 
         const heroGoTo = (idx) => {
-            heroCurrent.value = (idx + heroProducts.value.length) % heroProducts.value.length;
+            heroCurrent.value = (idx + heroBanners.value.length) % Math.max(heroBanners.value.length, 1);
         };
         const heroNext = () => heroGoTo(heroCurrent.value + 1);
         const heroPrev = () => heroGoTo(heroCurrent.value - 1);
 
         const startHeroTimer = () => {
             stopHeroTimer();
-            if (heroProducts.value.length < 2) return;
+            if (heroBanners.value.length < 2) return;
             heroTimer.value = setInterval(heroNext, HERO_DURATION);
         };
         const stopHeroTimer = () => {
             if (heroTimer.value) { clearInterval(heroTimer.value); heroTimer.value = null; }
+        };
+
+        const fetchBanners = async () => {
+            try {
+                const { data, error } = await sb.from('banners').select('*').order('sort_order',{ascending:true});
+                banners.value = (!error && data) ? data : [];
+            } catch(e) {
+                banners.value = [];
+            }
+            heroCurrent.value = 0;
+            startHeroTimer();
+        };
+
+        // 배너에서 상품 ID로 상세 이동
+        const goToDetailById = async (productId) => {
+            const found = products.value.find(p => p.id == productId);
+            if (found) { goToDetailView(found); return; }
+            // 상품 목록에 없으면 DB 조회
+            const { data } = await sb.from('products').select('*').eq('id', productId).maybeSingle();
+            if (data) {
+                data.sizes = Array.isArray(data.sizes)?data.sizes:(data.sizes?JSON.parse(data.sizes):[]);
+                data.detail_image_urls = Array.isArray(data.detail_image_urls)?data.detail_image_urls:(data.detail_image_urls?JSON.parse(data.detail_image_urls):[]);
+                goToDetailView(data);
+            }
         };
 
         const categories = ref(['시계','악세서리','etc']);
@@ -755,7 +823,40 @@ createApp({
         };
 
         // 내 주문
-        const myOrders     = ref([]);
+        const myOrders          = ref([]);
+        const reviewingOrderId  = ref(null);
+        const reviewText        = ref('');
+        const isReviewSubmitting = ref(false);
+
+        const deliveredOrders = computed(() =>
+            myOrders.value.filter(o => o.delivery_status === 'delivered' && !o.reviewed)
+        );
+
+        const startReview = (order) => {
+            reviewingOrderId.value = order.id;
+            reviewText.value = '';
+        };
+
+        const submitReview = async (order) => {
+            if (!reviewText.value.trim()) { alert('리뷰 내용을 입력해 주세요.'); return; }
+            isReviewSubmitting.value = true;
+            const name = currentUser.value?.user_metadata?.name || '회원';
+            const masked = name.length > 1 ? name[0] + '*'.repeat(name.length - 1) : name;
+            const { error } = await sb.from('reviews').insert([{
+                author:       masked,
+                product_name: order.product_name,
+                content:      reviewText.value.trim(),
+                order_id:     order.order_id,
+            }]);
+            if (error) { alert('리뷰 등록 실패: ' + error.message); isReviewSubmitting.value = false; return; }
+            // 주문에 reviewed 표시
+            await sb.from('orders').update({ reviewed: true }).eq('id', order.id);
+            isReviewSubmitting.value = false;
+            reviewingOrderId.value = null;
+            reviewText.value = '';
+            alert('✅ 리뷰가 등록되었습니다. 감사합니다!');
+            await fetchMyOrders();
+        };
         const fetchMyOrders = async () => {
             if (!currentUser.value) return;
             const { data } = await sb.from('orders').select('*').eq('user_id',currentUser.value.id).eq('status','paid').order('created_at',{ascending:false}).limit(10);
@@ -855,9 +956,8 @@ createApp({
                 if (session?.user) fetchMyOrders(); else myOrders.value=[];
             });
             isLoading.value=true;
-            await Promise.all([fetchProducts(),fetchNotices(),fetchReviews()]);
+            await Promise.all([fetchProducts(),fetchNotices(),fetchReviews(),fetchBanners()]);
             isLoading.value=false;
-            startHeroTimer();
             await handlePaymentReturn();
         });
 
@@ -976,8 +1076,8 @@ createApp({
                 await sendTelegramNotification(notifyMsg);
 
                 const alertMsg = isGuest
-                    ? '🎉 결제가 완료되었습니다!\n\n📋 비회원 주문 조회 번호: ' + order.lookup_code + '\n이 번호를 꼭 메모해두세요!'
-                    : '🎉 결제가 완료되었습니다!\n\n주문번호: ' + orderId;
+                    ? '🎉 결제가 완료되었습니다!\n\n📋 비회원 주문 조회 번호\n' + order.lookup_code + '\n\n이 번호로 주문조회 탭에서 배송현황을 확인하세요.\n카카오톡 문의 시 번호를 알려주세요!'
+                    : '🎉 결제가 완료되었습니다!\n\n주문번호: ' + orderId + '\n\n로그인 후 우측 프로필 아이콘에서 배송현황을 확인하실 수 있습니다.';
                 alert(alertMsg);
                 navigateTo('shop');
             } else if (payment==='fail'&&orderId) {
@@ -1167,11 +1267,12 @@ createApp({
 
         return {
             currentTab, selectedCategory, searchQuery, isLoading, activeProduct, orderOptions,
-            heroCurrent, heroProducts, heroGoTo, heroNext, heroPrev, startHeroTimer, stopHeroTimer,
+            heroCurrent, banners, heroBanners, heroGoTo, heroNext, heroPrev, startHeroTimer, stopHeroTimer, goToDetailById,
             categories, products, notices, reviews, filteredProducts, calculatedTotalPrice,
             triggerSearch, formatPrice, formatDate, openKakaoChat, goToDetailView, navigateTo,
             wishlist, isWishlisted, toggleWishlist,
             showSidePanel, openSidePanel, goToDetailFromPanel, myOrders,
+            deliveredOrders, reviewingOrderId, reviewText, isReviewSubmitting, startReview, submitReview,
             deliverySteps, deliveryLabel, shippingBadgeClass, getStepClass,
             currentUser, showAuthModal, authTab, isAuthLoading, authError, authSuccess, authForm,
             userInitial, openAuthModal, closeAuthModal,
