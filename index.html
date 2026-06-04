@@ -55,6 +55,21 @@
         .ship-step-dot.current { background:#fff;border-color:#6D6456;box-shadow:0 0 0 3px rgba(109,100,86,.2); }
         @keyframes fadeIn { from{opacity:0} to{opacity:1} }
         @keyframes slideUp { from{opacity:0;transform:translateY(16px)} to{opacity:1;transform:translateY(0)} }
+        /* 히어로 배너 */
+        .hero-banner { position:relative;width:100%;height:520px;overflow:hidden;background:#1a1814; }
+        .hero-slide { position:absolute;inset:0;transition:opacity .8s ease, transform .8s ease;opacity:0;transform:scale(1.03); }
+        .hero-slide.active { opacity:1;transform:scale(1); }
+        .hero-slide img { width:100%;height:100%;object-fit:cover; }
+        .hero-overlay { position:absolute;inset:0;background:linear-gradient(to bottom, rgba(0,0,0,.08) 0%, rgba(0,0,0,.55) 100%); }
+        .hero-content { position:absolute;bottom:0;left:0;right:0;padding:40px 48px;color:#fff; }
+        .hero-dots { display:flex;gap:6px;margin-bottom:16px; }
+        .hero-dot { width:6px;height:6px;border-radius:50%;background:rgba(255,255,255,.4);cursor:pointer;transition:all .3s; }
+        .hero-dot.active { width:22px;border-radius:3px;background:#fff; }
+        .hero-progress { position:absolute;bottom:0;left:0;height:2px;background:rgba(255,255,255,.6);transition:width linear; }
+        .hero-arrow { position:absolute;top:50%;transform:translateY(-50%);width:44px;height:44px;background:rgba(255,255,255,.15);backdrop-filter:blur(8px);border-radius:50%;display:flex;align-items:center;justify-content:center;cursor:pointer;transition:all .2s;color:#fff;font-size:18px;border:1px solid rgba(255,255,255,.2); }
+        .hero-arrow:hover { background:rgba(255,255,255,.28); }
+        .hero-arrow.left { left:20px; }
+        .hero-arrow.right { right:20px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col">
@@ -183,6 +198,44 @@
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8v8z"></path>
             </svg>
             데이터를 불러오는 중입니다...
+        </div>
+
+        <!-- 히어로 배너 -->
+        <div v-if="currentTab==='shop'&&!isLoading&&heroProducts.length>0" class="hero-banner -mx-4 mb-10"
+             @mouseenter="stopHeroTimer" @mouseleave="startHeroTimer">
+            <!-- 슬라이드 -->
+            <div v-for="(product, idx) in heroProducts" :key="product.id"
+                 :class="['hero-slide', idx===heroCurrent?'active':'']">
+                <img :src="product.image_url" :alt="product.name">
+                <div class="hero-overlay"></div>
+            </div>
+            <!-- 컨텐츠 -->
+            <div class="hero-content">
+                <div class="hero-dots">
+                    <div v-for="(p, idx) in heroProducts" :key="p.id"
+                         :class="['hero-dot', idx===heroCurrent?'active':'']"
+                         @click="heroGoTo(idx)"></div>
+                </div>
+                <div v-if="heroProducts[heroCurrent]" @click="goToDetailView(heroProducts[heroCurrent])" class="cursor-pointer">
+                    <p class="text-[11px] font-black tracking-[0.25em] text-white/60 uppercase mb-2">
+                        {{ heroProducts[heroCurrent].brand }} · {{ heroProducts[heroCurrent].category }}
+                    </p>
+                    <h2 class="text-2xl sm:text-3xl font-black text-white mb-3 leading-tight">
+                        {{ heroProducts[heroCurrent].name }}
+                    </h2>
+                    <div class="flex items-center gap-4">
+                        <span class="text-lg font-black text-white/90">{{ formatPrice(heroProducts[heroCurrent].price) }}원</span>
+                        <span class="text-xs font-bold text-white/70 border border-white/30 px-3 py-1.5 rounded-full hover:bg-white/10 transition">
+                            자세히 보기 ➔
+                        </span>
+                    </div>
+                </div>
+            </div>
+            <!-- 화살표 -->
+            <div v-if="heroProducts.length>1" class="hero-arrow left" @click="heroPrev">‹</div>
+            <div v-if="heroProducts.length>1" class="hero-arrow right" @click="heroNext">›</div>
+            <!-- 프로그레스 바 -->
+            <div class="hero-progress" :style="'width:'+(((heroCurrent+1)/heroProducts.length)*100)+'%'"></div>
         </div>
 
         <!-- SHOP -->
@@ -662,6 +715,28 @@ createApp({
         const isLoading        = ref(false);
         const activeProduct    = ref(null);
         const orderOptions     = ref({ size:'', custom:'', addBox:false });
+        // 히어로 배너
+        const heroCurrent  = ref(0);
+        const heroTimer    = ref(null);
+        const HERO_DURATION = 10000;
+
+        const heroProducts = computed(() => products.value.filter(p => p.image_url).slice(0, 6));
+
+        const heroGoTo = (idx) => {
+            heroCurrent.value = (idx + heroProducts.value.length) % heroProducts.value.length;
+        };
+        const heroNext = () => heroGoTo(heroCurrent.value + 1);
+        const heroPrev = () => heroGoTo(heroCurrent.value - 1);
+
+        const startHeroTimer = () => {
+            stopHeroTimer();
+            if (heroProducts.value.length < 2) return;
+            heroTimer.value = setInterval(heroNext, HERO_DURATION);
+        };
+        const stopHeroTimer = () => {
+            if (heroTimer.value) { clearInterval(heroTimer.value); heroTimer.value = null; }
+        };
+
         const categories = ref(['시계','악세서리','etc']);
         const products   = ref([]);
         const notices    = ref([]);
@@ -782,13 +857,17 @@ createApp({
             isLoading.value=true;
             await Promise.all([fetchProducts(),fetchNotices(),fetchReviews()]);
             isLoading.value=false;
+            startHeroTimer();
             await handlePaymentReturn();
         });
 
         // fetch
         async function fetchProducts() {
-            const { data }=await sb.from('products').select('*').order('created_at',{ascending:false});
+            const { data }=await sb.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false});
             products.value=(data||[]).map(p=>({...p,sizes:Array.isArray(p.sizes)?p.sizes:(p.sizes?JSON.parse(p.sizes):[]),detail_image_urls:Array.isArray(p.detail_image_urls)?p.detail_image_urls:(p.detail_image_urls?JSON.parse(p.detail_image_urls):[])}));
+            // 카테고리 동적 추출 (DB 상품 기준)
+            const cats = [...new Set((data||[]).map(p=>p.category).filter(Boolean))];
+            if (cats.length > 0) categories.value = cats;
         }
         async function fetchNotices() { const { data }=await sb.from('notices').select('*').order('created_at',{ascending:false}); notices.value=data||[]; }
         async function fetchReviews() { const { data }=await sb.from('reviews').select('*').order('created_at',{ascending:false}); reviews.value=data||[]; }
@@ -1088,6 +1167,7 @@ createApp({
 
         return {
             currentTab, selectedCategory, searchQuery, isLoading, activeProduct, orderOptions,
+            heroCurrent, heroProducts, heroGoTo, heroNext, heroPrev, startHeroTimer, stopHeroTimer,
             categories, products, notices, reviews, filteredProducts, calculatedTotalPrice,
             triggerSearch, formatPrice, formatDate, openKakaoChat, goToDetailView, navigateTo,
             wishlist, isWishlisted, toggleWishlist,
