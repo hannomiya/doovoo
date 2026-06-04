@@ -86,6 +86,7 @@
         <div class="border-b border-[#222] bg-[#0f0f0f] sticky top-[53px] z-30">
             <div class="max-w-7xl mx-auto px-5 py-2 flex gap-1 flex-wrap">
                 <button @click="adminTab='products'" :class="['tab-btn',adminTab==='products'?'active':'']">📦 상품 관리</button>
+                <button @click="adminTab='banners'" :class="['tab-btn',adminTab==='banners'?'active':'']">🖼️ 배너 관리</button>
                 <button @click="adminTab='categories'" :class="['tab-btn',adminTab==='categories'?'active':'']">🏷️ 카테고리</button>
                 <button @click="adminTab='notices'"  :class="['tab-btn',adminTab==='notices'?'active':'']">📢 공지사항</button>
                 <button @click="adminTab='reviews'"  :class="['tab-btn',adminTab==='reviews'?'active':'']">✍️ 리뷰</button>
@@ -95,6 +96,90 @@
         </div>
 
         <main class="flex-grow max-w-7xl mx-auto px-5 py-6 w-full">
+
+            <!-- ════ 배너 관리 ════ -->
+            <div v-if="adminTab==='banners'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+
+                <!-- 배너 등록 폼 -->
+                <div class="card p-5 space-y-3">
+                    <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase border-b border-[#2a2a2a] pb-2">배너 등록</h2>
+
+                    <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">배너 제목 *</label>
+                    <input v-model="newBanner.title" type="text" placeholder="배너 메인 문구" class="input"></div>
+
+                    <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">서브 문구 (선택)</label>
+                    <input v-model="newBanner.subtitle" type="text" placeholder="브랜드명 또는 부제목" class="input"></div>
+
+                    <!-- 연결 상품 선택 -->
+                    <div>
+                        <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">연결 상품 (클릭 시 이동)</label>
+                        <select v-model="newBanner.product_id" class="input">
+                            <option value="">연결 없음 (장식용)</option>
+                            <option v-for="p in products" :key="p.id" :value="p.id">{{ p.brand }} — {{ p.name }}</option>
+                        </select>
+                    </div>
+
+                    <!-- 이미지 업로드 -->
+                    <div class="bg-[#111] p-3 rounded-lg border border-[#8B7355]/30 space-y-2">
+                        <label class="block text-[10px] font-black text-[#8B7355] tracking-wider">📁 배너 이미지 * <span class="font-normal text-gray-600">(권장: 1920x520px)</span></label>
+                        <input type="file" @change="e=>handleBannerFileSelect(e)" accept="image/*" class="input text-gray-500">
+                        <div v-if="newBanner.preview" class="w-full h-32 rounded-lg overflow-hidden border border-[#333]">
+                            <img :src="newBanner.preview" class="w-full h-full object-cover">
+                        </div>
+                        <p v-if="bannerUploadProgress" class="text-[10px] text-[#8B7355]">{{ bannerUploadProgress }}</p>
+                    </div>
+
+                    <div v-if="bannerError" class="text-xs text-red-400 bg-red-900/20 px-3 py-2 rounded-lg">{{ bannerError }}</div>
+                    <button @click="addBanner" :disabled="isSaving" class="btn-primary w-full py-2.5">{{ isSaving?'저장 중...':'🖼️ 배너 등록' }}</button>
+
+                    <div class="bg-[#111] p-3 rounded-lg border border-[#2a2a2a] text-[10px] text-gray-500 space-y-1">
+                        <p class="font-bold text-gray-400">💡 배너 안내</p>
+                        <p>배너를 등록하면 스토어 메인 상단에 자동으로 표시됩니다.</p>
+                        <p>배너가 없으면 등록된 상품 이미지가 자동으로 표시됩니다.</p>
+                        <p>권장 이미지 비율은 가로 4:1 (예: 1920x480)입니다.</p>
+                    </div>
+                </div>
+
+                <!-- 등록된 배너 목록 -->
+                <div class="card p-5 space-y-3">
+                    <div class="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
+                        <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase">등록된 배너 ({{ bannerList.length }})</h2>
+                        <button @click="fetchBannerList" class="text-[10px] text-gray-600 hover:text-white transition">↻</button>
+                    </div>
+                    <div v-if="isBannersLoading" class="text-xs text-gray-600 text-center py-8">불러오는 중...</div>
+                    <div v-if="!isBannersLoading&&bannerList.length===0" class="text-xs text-gray-700 text-center py-12">등록된 배너가 없습니다.<br><span class="text-gray-600">현재 상품 이미지가 자동 표시 중</span></div>
+                    <div class="space-y-3 max-h-[580px] overflow-y-auto pr-1">
+                        <div v-for="(b, idx) in bannerList" :key="b.id" class="bg-[#111] rounded-xl border border-[#222] overflow-hidden">
+                            <!-- 배너 이미지 미리보기 -->
+                            <div class="w-full h-28 overflow-hidden relative">
+                                <img :src="b.image_url" class="w-full h-full object-cover">
+                                <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent flex items-end p-3">
+                                    <div>
+                                        <p v-if="b.subtitle" class="text-[9px] text-white/60 font-bold">{{ b.subtitle }}</p>
+                                        <p class="text-xs font-black text-white">{{ b.title }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-3 space-y-2">
+                                <div class="flex items-center justify-between">
+                                    <div class="space-y-0.5">
+                                        <p v-if="b.product_id" class="text-[9px] text-[#8B7355]">
+                                            연결 상품: {{ products.find(p=>p.id===b.product_id)?.name || '알 수 없음' }}
+                                        </p>
+                                        <p v-else class="text-[9px] text-gray-600">연결 상품 없음</p>
+                                        <p class="text-[9px] text-gray-600">순서: {{ b.sort_order }}</p>
+                                    </div>
+                                    <div class="flex gap-1">
+                                        <button @click="moveBanner(idx, -1)" :disabled="idx===0" class="text-[10px] text-gray-500 hover:text-white border border-[#333] px-2 py-1 rounded transition disabled:opacity-30">↑</button>
+                                        <button @click="moveBanner(idx, 1)" :disabled="idx===bannerList.length-1" class="text-[10px] text-gray-500 hover:text-white border border-[#333] px-2 py-1 rounded transition disabled:opacity-30">↓</button>
+                                        <button @click="deleteBanner(b.id, b.image_url)" class="btn-danger">삭제</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
 
             <!-- ════ 카테고리 관리 ════ -->
             <div v-if="adminTab==='categories'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -242,6 +327,9 @@
                                 </div>
                                 <button @click="togglePin(p)" :class="p.pinned?'bg-[#8B7355] text-white':'bg-[#222] text-gray-500'" class="text-[9px] font-bold px-2 py-0.5 rounded border border-[#333] hover:border-[#8B7355] transition text-center">
                                     {{ p.pinned?'📌 고정됨':'고정' }}
+                                </button>
+                                <button @click="toggleSoldOut(p)" :class="p.sold_out?'bg-red-900/60 text-red-400 border-red-900':'bg-[#222] text-gray-500 border-[#333]'" class="text-[9px] font-bold px-2 py-0.5 rounded border hover:border-red-700 transition text-center">
+                                    {{ p.sold_out ? '🚫 품절중' : '재고있음' }}
                                 </button>
                             </div>
                         </div>
@@ -538,6 +626,13 @@ createApp({
         const isSaving        = ref(false);
         const uploadProgress  = ref({ main:'', detail:'', notice:'', review:'' });
 
+        // 배너 state
+        const bannerList          = ref([]);
+        const isBannersLoading    = ref(false);
+        const bannerUploadProgress = ref('');
+        const bannerError         = ref('');
+        const newBanner = ref({ title:'', subtitle:'', product_id:'', file:null, preview:'' });
+
         const categories        = ref([]);
         const newCategoryName   = ref('');
         const editingCategoryIdx = ref(null);
@@ -620,11 +715,78 @@ createApp({
 
         const loadAll = async () => {
             isLoading.value=true;
-            await Promise.all([fetchProducts(),fetchNotices(),fetchReviews(),fetchCategories()]);
+            await Promise.all([fetchProducts(),fetchNotices(),fetchReviews(),fetchCategories(),fetchBannerList()]);
             isLoading.value=false;
         };
 
         // ── fetch ──────────────────────────────────────────────
+        // ── 배너 CRUD ──────────────────────────────────────────
+        const fetchBannerList = async () => {
+            isBannersLoading.value = true;
+            const { data } = await sb.from('banners').select('*').order('sort_order',{ascending:true});
+            bannerList.value = data || [];
+            isBannersLoading.value = false;
+        };
+
+        const handleBannerFileSelect = (event) => {
+            const file = event.target.files[0];
+            if (!file) return;
+            newBanner.value.file = file;
+            newBanner.value.preview = URL.createObjectURL(file);
+            bannerUploadProgress.value = '';
+        };
+
+        const addBanner = async () => {
+            bannerError.value = '';
+            if (!newBanner.value.title) { bannerError.value = '배너 제목을 입력해 주세요.'; return; }
+            if (!newBanner.value.file)  { bannerError.value = '배너 이미지를 선택해 주세요.'; return; }
+            isSaving.value = true;
+
+            const file = newBanner.value.file;
+            const ext  = file.name.split('.').pop();
+            const path = 'banners/' + Date.now() + '.' + ext;
+            bannerUploadProgress.value = '이미지 업로드 중...';
+            const { error: upErr } = await sb.storage.from(BUCKET).upload(path, file, { cacheControl:'3600', upsert:false });
+            if (upErr) { bannerError.value = '이미지 업로드 실패: ' + upErr.message; isSaving.value = false; return; }
+            const { data: urlData } = sb.storage.from(BUCKET).getPublicUrl(path);
+            bannerUploadProgress.value = '✅ 완료';
+
+            const maxOrder = bannerList.value.reduce((m,b) => Math.max(m, b.sort_order||0), 0);
+            const { error } = await sb.from('banners').insert([{
+                title:      newBanner.value.title,
+                subtitle:   newBanner.value.subtitle || null,
+                product_id: newBanner.value.product_id || null,
+                image_url:  urlData.publicUrl,
+                sort_order: maxOrder + 1,
+            }]);
+            isSaving.value = false;
+            if (error) { bannerError.value = '저장 실패: ' + error.message; return; }
+            alert('✅ 배너가 등록되었습니다.');
+            newBanner.value = { title:'', subtitle:'', product_id:'', file:null, preview:'' };
+            bannerUploadProgress.value = '';
+            await fetchBannerList();
+        };
+
+        const deleteBanner = async (id, imageUrl) => {
+            if (!confirm('이 배너를 삭제할까요?')) return;
+            if (imageUrl) {
+                const path = imageUrl.split(BUCKET + '/')[1];
+                if (path) await sb.storage.from(BUCKET).remove([path]);
+            }
+            await sb.from('banners').delete().eq('id', id);
+            await fetchBannerList();
+        };
+
+        const moveBanner = async (idx, dir) => {
+            const newIdx = idx + dir;
+            if (newIdx < 0 || newIdx >= bannerList.value.length) return;
+            const a = bannerList.value[idx];
+            const b = bannerList.value[newIdx];
+            await sb.from('banners').update({ sort_order: b.sort_order }).eq('id', a.id);
+            await sb.from('banners').update({ sort_order: a.sort_order }).eq('id', b.id);
+            await fetchBannerList();
+        };
+
         async function fetchCategories() {
             // Supabase categories 테이블 또는 products에서 추출
             const { data, error } = await sb.from('categories').select('name').order('sort_order',{ascending:true});
@@ -645,6 +807,7 @@ createApp({
                 sizes: Array.isArray(p.sizes)?p.sizes:(p.sizes?JSON.parse(p.sizes):[]),
                 detail_image_urls: Array.isArray(p.detail_image_urls)?p.detail_image_urls:(p.detail_image_urls?JSON.parse(p.detail_image_urls):[]),
                 pinned: p.pinned||false,
+                sold_out: p.sold_out||false,
                 sort_order: p.sort_order??999,
             }));
             orderChanged.value=false;
@@ -955,6 +1118,37 @@ createApp({
 
 
 
+        // ── 주문 취소 / 환불 ──────────────────────────────────────
+        const cancelOrder = async (order) => {
+            if (!confirm('주문을 취소하고 환불 처리하시겠습니까?\n\n주문번호: ' + order.order_id + '\n상품: ' + order.product_name + '\n금액: ' + formatPrice(order.amount) + '원\n\n※ 토스페이먼츠 대시보드에서 실제 환불을 진행해 주세요.')) return;
+
+            const { error } = await sb.from('orders').update({ status: 'cancelled', delivery_status: null }).eq('id', order.id);
+            if (error) { alert('취소 실패: ' + error.message); return; }
+
+            order.status = 'cancelled';
+            order.delivery_status = null;
+
+            await sendTelegramNotification([
+                '🚫 <b>주문 취소 처리</b>', '',
+                '📦 상품: ' + order.product_name,
+                '👤 받는 분: ' + order.receiver_name,
+                '💰 환불 금액: ' + formatPrice(order.amount) + '원',
+                '🔖 주문번호: <code>' + order.order_id + '</code>',
+                '',
+                '⚠️ 토스페이먼츠 대시보드에서 실제 환불을 진행하세요.',
+            ].join('\n'));
+
+            alert('✅ 주문이 취소 처리되었습니다.\n\n토스페이먼츠 대시보드(https://dashboard.tosspayments.com)에서 실제 환불을 진행해 주세요.');
+        };
+
+        // ── 품절 토글 ──────────────────────────────────────────────
+        const toggleSoldOut = async (p) => {
+            const newSoldOut = !p.sold_out;
+            const { error } = await sb.from('products').update({ sold_out: newSoldOut }).eq('id', p.id);
+            if (error) { alert('변경 실패: ' + error.message); return; }
+            p.sold_out = newSoldOut;
+        };
+
         const updateDeliveryStatus = async (order, newStatus) => {
             const { error }=await sb.from('orders').update({ delivery_status:newStatus }).eq('id',order.id);
             if (error) { alert('업데이트 실패: '+error.message); return; }
@@ -978,6 +1172,8 @@ createApp({
             newProduct, newNotice, newReview,
             login, logout, fetchProducts, fetchNotices, fetchReviews,
             handleFileSelect, syncSizes, addProduct, deleteProduct,
+            bannerList, isBannersLoading, bannerUploadProgress, bannerError, newBanner,
+            fetchBannerList, handleBannerFileSelect, addBanner, deleteBanner, moveBanner,
             newCategoryName, editingCategoryIdx, editCategoryName, categoryError,
             addCategory, startEditCategory, saveCategoryEdit, deleteCategory, fetchCategories,
             addNotice, deleteNotice, addReview, deleteReview,
@@ -991,7 +1187,7 @@ createApp({
             fetchUsers, openUserDetail, kickUser,
             orders, isOrdersLoading, orderSearch, orderStatusFilter, filteredOrders,
             deliverySteps, deliveryLabel, stepBadgeClass, orderCountByStatus,
-            fetchOrders, updateDeliveryStatus,
+            fetchOrders, updateDeliveryStatus, cancelOrder, toggleSoldOut,
             downloadExcel,
         };
     }
