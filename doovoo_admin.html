@@ -86,6 +86,7 @@
         <div class="border-b border-[#222] bg-[#0f0f0f] sticky top-[53px] z-30">
             <div class="max-w-7xl mx-auto px-5 py-2 flex gap-1 flex-wrap">
                 <button @click="adminTab='products'" :class="['tab-btn',adminTab==='products'?'active':'']">📦 상품 관리</button>
+                <button @click="adminTab='categories'" :class="['tab-btn',adminTab==='categories'?'active':'']">🏷️ 카테고리</button>
                 <button @click="adminTab='notices'"  :class="['tab-btn',adminTab==='notices'?'active':'']">📢 공지사항</button>
                 <button @click="adminTab='reviews'"  :class="['tab-btn',adminTab==='reviews'?'active':'']">✍️ 리뷰</button>
                 <button @click="adminTab='users'; fetchUsers()" :class="['tab-btn',adminTab==='users'?'active':'']">👥 회원 현황</button>
@@ -94,6 +95,65 @@
         </div>
 
         <main class="flex-grow max-w-7xl mx-auto px-5 py-6 w-full">
+
+            <!-- ════ 카테고리 관리 ════ -->
+            <div v-if="adminTab==='categories'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <!-- 카테고리 추가 -->
+                <div class="card p-5 space-y-4">
+                    <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase border-b border-[#2a2a2a] pb-2">카테고리 추가</h2>
+                    <div>
+                        <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">카테고리명 *</label>
+                        <input v-model="newCategoryName" type="text" placeholder="예: 의류, 가방, 신발..." class="input" @keyup.enter="addCategory">
+                    </div>
+                    <div v-if="categoryError" class="text-xs text-red-400 bg-red-900/20 px-3 py-2 rounded-lg">{{ categoryError }}</div>
+                    <button @click="addCategory" :disabled="isSaving" class="btn-primary w-full py-2.5">
+                        {{ isSaving ? '저장 중...' : '➕ 카테고리 추가' }}
+                    </button>
+                    <div class="bg-[#111] p-3 rounded-lg border border-[#2a2a2a] text-[10px] text-gray-500 space-y-1">
+                        <p class="font-bold text-gray-400">💡 안내</p>
+                        <p>카테고리는 상품에 직접 등록된 값 기준으로 자동 추출됩니다.</p>
+                        <p>여기서 추가한 카테고리는 상품 등록 시 선택 목록에 바로 반영됩니다.</p>
+                    </div>
+                </div>
+
+                <!-- 카테고리 목록 -->
+                <div class="card p-5 space-y-3">
+                    <div class="flex justify-between items-center border-b border-[#2a2a2a] pb-2">
+                        <h2 class="text-xs font-black tracking-wider text-[#8B7355] uppercase">카테고리 목록 ({{ categories.length }})</h2>
+                    </div>
+                    <div class="space-y-2 max-h-[500px] overflow-y-auto pr-1">
+                        <div v-if="categories.length===0" class="text-xs text-gray-700 text-center py-12">등록된 카테고리가 없습니다.</div>
+                        <div v-for="(cat, idx) in categories" :key="cat"
+                             class="flex items-center gap-3 bg-[#111] p-3 rounded-lg border border-[#222]">
+                            <!-- 수정 중 -->
+                            <div v-if="editingCategoryIdx===idx" class="flex-grow flex items-center gap-2">
+                                <input v-model="editCategoryName" type="text" class="input flex-grow" @keyup.enter="saveCategoryEdit(idx)" @keyup.escape="editingCategoryIdx=null">
+                                <button @click="saveCategoryEdit(idx)" class="btn-primary px-3 py-1.5 text-[10px] shrink-0">저장</button>
+                                <button @click="editingCategoryIdx=null" class="btn-secondary px-3 py-1.5 text-[10px] shrink-0">취소</button>
+                            </div>
+                            <!-- 일반 표시 -->
+                            <div v-else class="flex items-center justify-between w-full">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[10px] font-black text-[#8B7355]">#</span>
+                                    <span class="text-sm font-bold text-gray-300">{{ cat }}</span>
+                                    <span class="text-[9px] text-gray-600">
+                                        (상품 {{ products.filter(p=>p.category===cat).length }}개)
+                                    </span>
+                                </div>
+                                <div class="flex gap-1 shrink-0">
+                                    <button @click="startEditCategory(idx, cat)" class="btn-warning py-1 px-2 text-[10px]">수정</button>
+                                    <button @click="deleteCategory(idx, cat)" class="btn-danger">삭제</button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <!-- 저장 안내 -->
+                    <div class="bg-[#111] p-3 rounded-lg border border-[#2a2a2a] text-[10px] text-gray-500">
+                        <p>⚠️ 카테고리 수정/삭제 시 해당 카테고리의 <b class="text-gray-400">기존 상품에는 영향을 주지 않습니다.</b></p>
+                        <p class="mt-1">상품 카테고리를 일괄 변경하려면 각 상품을 개별 수정해 주세요.</p>
+                    </div>
+                </div>
+            </div>
 
             <!-- ════ 상품 관리 ════ -->
             <div v-if="adminTab==='products'" class="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -478,7 +538,11 @@ createApp({
         const isSaving        = ref(false);
         const uploadProgress  = ref({ main:'', detail:'', notice:'', review:'' });
 
-        const categories = ref(['시계','악세서리','etc']);
+        const categories        = ref([]);
+        const newCategoryName   = ref('');
+        const editingCategoryIdx = ref(null);
+        const editCategoryName  = ref('');
+        const categoryError     = ref('');
         const products   = ref([]);
         const notices    = ref([]);
         const reviews    = ref([]);
@@ -554,9 +618,26 @@ createApp({
             if (session) { isAuthenticated.value=true; adminEmail.value=session.user.email; loadAll(); }
         });
 
-        const loadAll = async () => { isLoading.value=true; await Promise.all([fetchProducts(),fetchNotices(),fetchReviews()]); isLoading.value=false; };
+        const loadAll = async () => {
+            isLoading.value=true;
+            await Promise.all([fetchProducts(),fetchNotices(),fetchReviews(),fetchCategories()]);
+            isLoading.value=false;
+        };
 
         // ── fetch ──────────────────────────────────────────────
+        async function fetchCategories() {
+            // Supabase categories 테이블 또는 products에서 추출
+            const { data, error } = await sb.from('categories').select('name').order('sort_order',{ascending:true});
+            if (!error && data && data.length > 0) {
+                categories.value = data.map(c => c.name);
+            } else {
+                // categories 테이블 없으면 products에서 추출
+                const { data: pdata } = await sb.from('products').select('category');
+                const cats = [...new Set((pdata||[]).map(p=>p.category).filter(Boolean))];
+                categories.value = cats.length > 0 ? cats : ['시계','악세서리','etc'];
+            }
+        }
+
         async function fetchProducts() {
             const { data }=await sb.from('products').select('*').order('sort_order',{ascending:true}).order('created_at',{ascending:false});
             products.value=(data||[]).map(p=>({
@@ -761,6 +842,54 @@ createApp({
             uploadProgress.value={main:'',detail:'',notice:'',review:''}; await fetchProducts();
         };
 
+        // ── 카테고리 CRUD ─────────────────────────────────────
+        const addCategory = async () => {
+            categoryError.value = '';
+            const name = newCategoryName.value.trim();
+            if (!name) { categoryError.value = '카테고리명을 입력해 주세요.'; return; }
+            if (categories.value.includes(name)) { categoryError.value = '이미 존재하는 카테고리입니다.'; return; }
+
+            isSaving.value = true;
+            // categories 테이블에 저장 시도
+            const { error } = await sb.from('categories').insert([{ name, sort_order: categories.value.length }]);
+            isSaving.value = false;
+
+            if (error && error.code !== '42P01') {
+                // 테이블 없으면 로컬만
+                categoryError.value = '저장 실패: ' + error.message; return;
+            }
+            categories.value.push(name);
+            newCategoryName.value = '';
+        };
+
+        const startEditCategory = (idx, name) => {
+            editingCategoryIdx.value = idx;
+            editCategoryName.value = name;
+        };
+
+        const saveCategoryEdit = async (idx) => {
+            const newName = editCategoryName.value.trim();
+            const oldName = categories.value[idx];
+            if (!newName || newName === oldName) { editingCategoryIdx.value = null; return; }
+            if (categories.value.includes(newName)) { alert('이미 존재하는 카테고리명입니다.'); return; }
+
+            // categories 테이블 업데이트 시도
+            await sb.from('categories').update({ name: newName }).eq('name', oldName);
+            categories.value[idx] = newName;
+            editingCategoryIdx.value = null;
+        };
+
+        const deleteCategory = async (idx, name) => {
+            const productCount = products.value.filter(p => p.category === name).length;
+            if (productCount > 0) {
+                if (!confirm(name + ' 카테고리를 삭제할까요?\n(해당 카테고리 상품 ' + productCount + '개는 영향받지 않습니다)')) return;
+            } else {
+                if (!confirm(name + ' 카테고리를 삭제할까요?')) return;
+            }
+            await sb.from('categories').delete().eq('name', name);
+            categories.value.splice(idx, 1);
+        };
+
         const deleteProduct = async (id, imageUrl, detailUrls) => {
             if(!confirm('이 상품을 삭제할까요?'))return;
             const paths=[];
@@ -849,6 +978,8 @@ createApp({
             newProduct, newNotice, newReview,
             login, logout, fetchProducts, fetchNotices, fetchReviews,
             handleFileSelect, syncSizes, addProduct, deleteProduct,
+            newCategoryName, editingCategoryIdx, editCategoryName, categoryError,
+            addCategory, startEditCategory, saveCategoryEdit, deleteCategory, fetchCategories,
             addNotice, deleteNotice, addReview, deleteReview,
             formatDate, formatPrice,
             draggingId, dragOverId, orderChanged,
