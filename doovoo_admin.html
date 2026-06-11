@@ -3,8 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Doovoo 관제실</title>
+    <title id="admin-title">Doovoo 관제실</title>
+    <script>if(typeof SHOP_CONFIG!=="undefined"){document.getElementById("admin-title").textContent=SHOP_CONFIG.brand.adminTitle;}</script>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="config.js"></script>
     <script src="https://unpkg.com/vue@3/dist/vue.global.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.sheetjs.com/xlsx-0.20.1/package/dist/xlsx.full.min.js"></script>
@@ -73,7 +75,8 @@
         <header class="border-b border-[#222] bg-[#111] sticky top-0 z-40">
             <div class="max-w-7xl mx-auto px-5 py-3 flex justify-between items-center">
                 <div class="flex items-center gap-4">
-                    <div><h1 class="text-sm font-black tracking-widest text-white">DOOVOO <span class="text-[#8B7355]">관제실</span></h1><p class="text-[10px] text-gray-600">{{ adminEmail }}</p></div>
+                    <div><h1 class="text-sm font-black tracking-widest text-white" id="admin-header-title">DOOVOO <span class="text-[#8B7355]">관제실</span></h1>
+                    <script>if(typeof SHOP_CONFIG!=="undefined"&&document.getElementById("admin-header-title")){document.getElementById("admin-header-title").innerHTML=SHOP_CONFIG.brand.name+' <span style="color:#8B7355">관제실</span>';}</script><p class="text-[10px] text-gray-600">{{ adminEmail }}</p></div>
                     <span class="badge" style="background:#1a2e1a;color:#4ade80;">● LIVE</span>
                 </div>
                 <div class="flex items-center gap-3">
@@ -251,7 +254,20 @@
                         <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">상품명 *</label><input v-model="newProduct.name" type="text" placeholder="상품명 입력" class="input"></div>
                     </div>
                     <div class="grid grid-cols-2 gap-2">
-                        <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">카테고리</label><select v-model="newProduct.category" class="input"><option v-for="c in categories" :value="c">{{ c }}</option></select></div>
+                        <div>
+                            <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">카테고리</label>
+                            <select v-if="!newProduct.customCategory" v-model="newProduct.category" class="input">
+                                <option value="">카테고리 선택</option>
+                                <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+                                <option value="__custom__">+ 직접 입력</option>
+                            </select>
+                            <div v-if="newProduct.category==='__custom__'||newProduct.customCategory" class="flex gap-1">
+                                <input v-model="newProduct.customCategoryName" type="text" placeholder="카테고리명 입력" class="input flex-grow" @keyup.enter="applyCustomCategory">
+                                <button @click="applyCustomCategory" class="btn-primary px-2 text-[10px] shrink-0">확인</button>
+                                <button @click="newProduct.category='';newProduct.customCategory=false;newProduct.customCategoryName=''" class="px-2 text-[10px] text-gray-500 border border-[#333] shrink-0">✕</button>
+                            </div>
+                            <p v-if="newProduct.customCategory" class="text-[9px] text-[#8B7355] mt-1">선택됨: {{ newProduct.category }}</p>
+                        </div>
                         <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">판매가 (원) *</label><input v-model.number="newProduct.price" type="number" placeholder="0" class="input"></div>
                     </div>
                     <!-- 사이즈 매핑 직접 입력 6칸 -->
@@ -512,7 +528,20 @@
                     <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">상품명 *</label><input v-model="editForm.name" type="text" class="input"></div>
                 </div>
                 <div class="grid grid-cols-2 gap-2">
-                    <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">카테고리</label><select v-model="editForm.category" class="input"><option v-for="c in categories" :value="c">{{ c }}</option></select></div>
+                    <div>
+                        <label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">카테고리</label>
+                        <select v-if="!editForm.customCategory" v-model="editForm.category" class="input">
+                            <option value="">카테고리 선택</option>
+                            <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+                            <option value="__custom__">+ 직접 입력</option>
+                        </select>
+                        <div v-if="editForm.category==='__custom__'||editForm.customCategory" class="flex gap-1">
+                            <input v-model="editForm.customCategoryName" type="text" placeholder="카테고리명 입력" class="input flex-grow" @keyup.enter="applyEditCustomCategory">
+                            <button @click="applyEditCustomCategory" class="btn-primary px-2 text-[10px] shrink-0">확인</button>
+                            <button @click="editForm.category='';editForm.customCategory=false;editForm.customCategoryName=''" class="px-2 text-[10px] text-gray-500 border border-[#333] shrink-0">✕</button>
+                        </div>
+                        <p v-if="editForm.customCategory" class="text-[9px] text-[#8B7355] mt-1">선택됨: {{ editForm.category }}</p>
+                    </div>
                     <div><label class="block text-[10px] text-gray-500 mb-1 font-bold tracking-wider">판매가 (원) *</label><input v-model.number="editForm.price" type="number" class="input"></div>
                 </div>
                 <!-- 사이즈 수정 -->
@@ -588,12 +617,13 @@
 const { createApp, ref, computed, onMounted } = Vue;
 const { createClient } = supabase;
 
-const SUPABASE_URL  = 'https://ntexeskcthjnfafogknk.supabase.co';
-const SUPABASE_ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im50ZXhlc2tjdGhqbmZhZm9na25rIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAxMzExMjEsImV4cCI6MjA5NTcwNzEyMX0.qz9hqjP_-wYFUeGmbC3mh0ZPEQsPUKAAxJYUHeviauY';
-const BUCKET = 'doovoo-images';
+// ── 설정값은 config.js에서 로드 ──
+const SUPABASE_URL  = SHOP_CONFIG.supabase.url;
+const SUPABASE_ANON = SHOP_CONFIG.supabase.anonKey;
+const BUCKET        = SHOP_CONFIG.supabase.bucket;
 
-const TELEGRAM_BOT_TOKEN = '8710100611:AAEXZM6AO-2iKwtVFg6b1Y2Y9_pgbZCwUKg';
-const TELEGRAM_CHAT_ID   = '8995229452';
+const TELEGRAM_BOT_TOKEN = SHOP_CONFIG.telegram.botToken;
+const TELEGRAM_CHAT_ID   = SHOP_CONFIG.telegram.chatId;
 
 const sendTelegramNotification = async (message) => {
     try {
@@ -656,10 +686,11 @@ createApp({
             description:'', sizes:[], sizeInputs:['','','','','',''],
             use_box_option:false, box_price:0,
             image_url:'', detail_image_urls:[],
-            newMainFile:null, newDetailFiles:[]
+            newMainFile:null, newDetailFiles:[],
+            customCategory:false, customCategoryName:''
         });
 
-        const newProduct = ref({ brand:'', name:'', category:'시계', price:null, description:'', sizes:[], sizeInputs:['','','','','',''], use_box_option:false, box_price:0, mainFile:null, mainPreview:'', detailFiles:[] });
+        const newProduct = ref({ brand:'', name:'', category:'', price:null, description:'', sizes:[], sizeInputs:['','','','','',''], use_box_option:false, box_price:0, mainFile:null, mainPreview:'', detailFiles:[], customCategory:false, customCategoryName:'' });
         const newNotice  = ref({ title:'', content:'', noticeFile:null });
         const newReview  = ref({ author:'', product_name:'', content:'', reviewFile:null });
 
@@ -796,7 +827,7 @@ createApp({
                 // categories 테이블 없으면 products에서 추출
                 const { data: pdata } = await sb.from('products').select('category');
                 const cats = [...new Set((pdata||[]).map(p=>p.category).filter(Boolean))];
-                categories.value = cats.length > 0 ? cats : ['시계','악세서리','etc'];
+                categories.value = cats;
             }
         }
 
@@ -870,6 +901,30 @@ createApp({
 
         // ── 사이즈 동기화 ──────────────────────────────────────
         const syncSizes = () => { newProduct.value.sizes = newProduct.value.sizeInputs.map(s=>s.trim().toUpperCase()).filter(s=>s); };
+
+        // 카테고리 직접 입력 적용
+        const applyCustomCategory = () => {
+            const name = newProduct.value.customCategoryName.trim();
+            if (!name) return;
+            newProduct.value.category = name;
+            newProduct.value.customCategory = true;
+            // categories 목록에도 추가
+            if (!categories.value.includes(name)) {
+                categories.value.push(name);
+                sb.from('categories').insert([{ name, sort_order: categories.value.length }]).then(()=>{});
+            }
+        };
+
+        const applyEditCustomCategory = () => {
+            const name = editForm.value.customCategoryName.trim();
+            if (!name) return;
+            editForm.value.category = name;
+            editForm.value.customCategory = true;
+            if (!categories.value.includes(name)) {
+                categories.value.push(name);
+                sb.from('categories').insert([{ name, sort_order: categories.value.length }]).then(()=>{});
+            }
+        };
         const syncEditSizes = () => { editForm.value.sizes = editForm.value.sizeInputs.map(s=>s.trim().toUpperCase()).filter(s=>s); };
 
         // ── 상품 수정 모달 ─────────────────────────────────────
@@ -877,6 +932,8 @@ createApp({
             editingProduct.value = p;
             editError.value = '';
             editUploadProgress.value = { main:'', detail:'' };
+            editForm.value.customCategory = false;
+            editForm.value.customCategoryName = '';
             // sizeInputs 기존 사이즈로 채우기
             const pads = [...(p.sizes||[]),...Array(6).fill('')].slice(0,6);
             editForm.value = {
@@ -1171,7 +1228,7 @@ createApp({
             categories, products, notices, reviews,
             newProduct, newNotice, newReview,
             login, logout, fetchProducts, fetchNotices, fetchReviews,
-            handleFileSelect, syncSizes, addProduct, deleteProduct,
+            handleFileSelect, syncSizes, applyCustomCategory, applyEditCustomCategory, addProduct, deleteProduct,
             bannerList, isBannersLoading, bannerUploadProgress, bannerError, newBanner,
             fetchBannerList, handleBannerFileSelect, addBanner, deleteBanner, moveBanner,
             newCategoryName, editingCategoryIdx, editCategoryName, categoryError,
